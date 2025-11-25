@@ -1,5 +1,5 @@
 const CACHE_NAME = "pemooda-cache-v1";
-const URLS_TO_CACHE = ["/", "/manifest.json", "/", "/favicon.ico"];
+const URLS_TO_CACHE = ["/", "/manifest.json", "/favicon.ico"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

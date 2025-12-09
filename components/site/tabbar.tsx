@@ -10,14 +10,15 @@ import React from "react";
 import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 
 const items = [
   { label: "Home", icon: HomeIcon, href: "/", regex: /^\/$/ },
   {
     label: "Event",
     icon: CalendarFoldIcon,
-    href: "/calendar",
-    regex: /^\/calendar/,
+    href: "/event",
+    regex: /^\/event/,
   },
   {
     label: "Finance",
@@ -37,7 +38,7 @@ const items = [
 const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
   const pathname = usePathname();
   return (
-    <footer
+    <nav
       className={cn(
         "p-3 bg-white shadow-sm border-t flex justify-evenly",
         className
@@ -51,12 +52,15 @@ const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
           variant={"ghost"}
           data-active={pathname.match(i.regex) ? true : false}
           size={"default"}
+          asChild
         >
-          <i.icon className="w-5! h-5!" />
-          <small>{i.label}</small>
+          <Link href={i.href}>
+            <i.icon className="w-5! h-5!" />
+            <small>{i.label}</small>
+          </Link>
         </Button>
       ))}
-    </footer>
+    </nav>
   );
 };
 

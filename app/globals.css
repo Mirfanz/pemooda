@@ -167,3 +167,7 @@
     display: none;
   }
 }
+
+.animate-button:active {
+  @apply scale-[0.96] md:scale-[0.98] brightness-90;
+}

@@ -1,0 +1,216 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String  @id @default(cuid())
+  email          String  @unique @db.Citext
+  phoneNumber    String? @unique @map("phone_number")
+  hashedPassword String  @map("password_hash")
+  name           String
+  avatarUrl      String? @map("avatar_url")
+  isVerified     Boolean @default(false) @map("is_verified")
+
+  organizationId String? @map("organization_id")
+  role           Role?   @default(ANGGOTA)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  organization         Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  details              UserDetail?
+  createdOrganizations Organization[] @relation("OrganizationCreator")
+  createdActivities    Activity[]     @relation("ActivityCreator")
+  createdAnnouncements Announcement[] @relation("AnnouncementCreator")
+  createdInvitations   Invitation[]   @relation("InvitationCreator")
+  attendees            Attendee[]
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("users")
+}
+
+model UserDetail {
+  userId    String    @id
+  address   String?
+  phone     String?
+  birthDate DateTime? @map("birth_date")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_details")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  tagline   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdBy String   @map("created_by")
+
+  users         User[]
+  details       OrganizationDetail?
+  summary       OrganizationSummary?
+  activities    Activity[]
+  announcements Announcement[]
+  invitations   Invitation[]
+  creator       User                 @relation(name: "OrganizationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([createdBy])
+  @@index([name])
+  @@map("organizations")
+}
+
+model OrganizationDetail {
+  organizationId String   @id @map("organization_id")
+  address        String?
+  phone          String?
+  instagramUrl   String?  @map("instagram_url")
+  facebookUrl    String?  @map("facebook_url")
+  twitterUrl     String?  @map("twitter_url")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_details")
+}
+
+model OrganizationSummary {
+  organizationId  String   @id @map("organization_id")
+  totalMembers    Int      @default(0) @map("total_members")
+  totalActivities Int      @default(0) @map("total_activities")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("organization_summaries")
+}
+
+model Invitation {
+  id             String   @id @default(cuid())
+  email          String  @db.Citext
+  organizationId String   @map("organization_id")
+  role           Role     @default(ANGGOTA)
+  token          String   @unique
+  createdAt      DateTime @default(now()) @map("created_at")
+  expiresAt      DateTime @map("expires_at")
+  createdBy      String   @map("created_by")
+
+  creator      User         @relation(name: "InvitationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitations")
+}
+
+model Activity {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  notes          String[]
+  type           ActivityType
+  startDate      DateTime     @map("start_date")
+  endDate        DateTime?    @map("end_date")
+  location       String?
+  mapsUrl        String?      @map("maps_url")
+  organizationId String       @map("organization_id")
+  createdBy      String       @map("created_by")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User         @relation(name: "ActivityCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  attendances  Attendance[]
+
+  @@index([organizationId])
+  @@index([createdBy])
+  @@map("activities")
+}
+
+model Attendance {
+  id         String   @id @default(cuid())
+  activityId String   @map("activity_id")
+  isOpen     Boolean  @default(false) @map("is_open")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  activity  Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
+  attendees Attendee[]
+
+  @@unique([activityId])
+  @@index([activityId])
+  @@map("attendances")
+}
+
+model Attendee {
+  id           String         @id @default(cuid())
+  userId       String         @map("user_id")
+  attendanceId String         @map("attendance_id")
+  status       AttendeeStatus @default(PENDING)
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendance Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, attendanceId])
+  @@index([attendanceId])
+  @@map("attendees")
+}
+
+model Announcement {
+  id             String   @id @default(cuid())
+  title          String
+  content        String
+  organizationId String   @map("organization_id")
+  createdBy      String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User         @relation(name: "AnnouncementCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([createdBy])
+  @@map("announcements")
+}
+
+enum Role {
+  KETUA
+  SEKRETARIS
+  BENDAHARA
+  ANGGOTA
+  SENIOR
+  PEMBINA
+}
+
+enum AttendeeStatus {
+  PENDING
+  PRESENT
+  ABSENT
+  EXCUSE
+}
+
+enum ActivityType {
+  MEETING
+  TRAINING
+  VOLUNTEER
+  GATHERING
+  SEMINAR
+  OTHER
+}

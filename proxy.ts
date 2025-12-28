@@ -15,7 +15,7 @@ const guestOnlyRoutes = ["/auth/login", "/auth/register"];
 // Routes yang hanya bisa diakses jika login tapi BELUM terverifikasi
 const unverifiedOnlyRoutes = ["/auth/verify"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get(COOKIE_NAME)?.value;
 

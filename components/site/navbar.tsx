@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Button } from "../ui/button";
+import { Button } from "@heroui/react";
 import { ListMinusIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ const Navbar = ({ className, ...props }: Props) => {
     <nav className={cn("p-3 bg-white shadow-sm z-50", className)} {...props}>
       <div className="flex items-center">
         <h1 className="text-lg font-semibold me-auto  font-sans">Pemooda</h1>
-        <Button className="" size={"icon-sm"} variant="outline">
+        <Button className="" variant="secondary" isIconOnly>
           <ListMinusIcon className="rotate-180" />
         </Button>
       </div>

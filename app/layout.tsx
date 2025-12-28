@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body
-        className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} antialiased h-dvh! flex font-sans bg-linear-to-br from-slate-900 via-slate-800 to-slate-900`}
+        className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} antialiased h-dvh! overflow-auto flex font-sans bg-linear-to-br bg-fixed from-primary-50 via-background to-primary-100`}
       >
         <Providers>{children}</Providers>
       </body>

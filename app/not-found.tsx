@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import Link from "next/link";
 
 export default function NotFound() {
@@ -11,29 +11,25 @@ export default function NotFound() {
           </h1>
         </div>
 
-        <h2 className="text-4xl font-bold text-white mb-4">Page Not Found</h2>
+        <h2 className="text-4xl font-bold mb-4">Page Not Found</h2>
 
-        <p className="text-lg text-slate-400 mb-8 max-w-md mx-auto">
+        <p className="text-lg text-muted mb-8 max-w-md mx-auto">
           Oops! The page you&apos;re looking for doesn&apos;t exist or has been
           moved.
         </p>
 
         <div className="flex gap-4 justify-center">
+          <Link href={"/"}>
+            <Button size="lg" className="animated-button">
+              Go Home
+            </Button>
+          </Link>
           <Button
-            asChild
-            size={"lg"}
-            className="animated-button"
-            variant={"gradient"}
+            size="lg"
+            variant="secondary"
+            className="bg-transparent border border-primary"
           >
-            <Link href="/">Go Home</Link>
-          </Button>
-          <Button asChild size={"lg"} className="" variant={"outline"}>
-            <Link
-              target="_blank"
-              href="https://www.instagram.com/mirfan.project"
-            >
-              Contact Us
-            </Link>
+            Contact Us
           </Button>
         </div>
 

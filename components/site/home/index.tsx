@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@heroui/react";
 import {
   ArrowUpRightFromSquareIcon,
   BellRingIcon,
@@ -15,38 +12,32 @@ import {
   TwitterIcon,
   WalletIcon,
 } from "lucide-react";
+import { useAuth } from "@/contexts/auth-context";
 
 const Home = () => {
+  const auth = useAuth();
   return (
     <main className="">
       <div className="bg-white shadow-xl rounded-b-3xl p-4">
         <div className="flex items-center gap-3 mb-4">
-          <Avatar className="w-12 h-12 outline-2 outline-offset-2 outline-secondary">
-            <AvatarImage src="/avatar.jpg" alt="Avatar" />
-            <AvatarFallback>MI</AvatarFallback>
-          </Avatar>
+          <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold outline-2 outline-offset-2 outline-secondary">
+            MI
+          </div>
           <div className="">
             <p className="text-sm text-muted-foreground">Good Morning</p>
             <h4 className="font-bold">Muhammad Irfan</h4>
           </div>
-          <Button
-            size={"icon-lg"}
-            className="rounded-full ms-auto"
-            variant={"ghost"}
-          >
+          <Button isIconOnly className="rounded-full ms-auto" variant="ghost">
             <BellRingIcon className="w-5! h-5!" />
           </Button>
         </div>
-        <Card className="relative bg-linear-to-br from-[#5046E5] to-[#6C2ADA] shadow p-0 text-white rounded-2xl">
+        <div className="relative bg-linear-to-br from-[#5046E5] to-[#6C2ADA] shadow text-white rounded-2xl p-4">
           <div className="w-32 h-32 translate-x-10 -translate-y-10 opacity-10 bg-white rounded-full absolute top-0 right-0"></div>
-          <CardContent className="px-4 py-3">
+          <div className="relative">
             <div className="mb-4">
-              <Badge
-                variant={"outline"}
-                className="uppercase bg-white/20 rounded-sm text-white text-xs"
-              >
+              <span className="uppercase bg-white/20 rounded-sm text-white text-xs px-2 py-1 inline-block">
                 Kartu Anggota
-              </Badge>
+              </span>
             </div>
             <h3 className="font-bold text-xl mb-1 font-poppins text-center">
               GARDA TAMA
@@ -56,44 +47,45 @@ const Home = () => {
             </p>
             <div className="flex gap-2">
               <Button
-                size={"icon-lg"}
-                variant={"ghost"}
+                isIconOnly
+                variant="ghost"
                 className="outline-2! outline-white!"
               >
                 <InstagramIcon className="w-5! h-5!" />
               </Button>
               <Button
-                size={"icon-lg"}
-                variant={"ghost"}
+                isIconOnly
+                variant="ghost"
                 className="outline-2! outline-white!"
               >
                 <MessageSquareDotIcon className="w-5! h-5!" />
               </Button>
               <Button
-                size={"icon-lg"}
-                variant={"ghost"}
+                isIconOnly
+                variant="ghost"
                 className="outline-2! outline-white!"
               >
                 <TwitterIcon className="w-5! h-5!" />
               </Button>
               <Button
-                size={"icon-lg"}
-                variant={"ghost"}
+                isIconOnly
+                variant="ghost"
                 className="outline-2! outline-white! ms-auto"
               >
                 <ListIcon className="w-5! h-5!" />
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
       <div className="p-4">
         <div className="flex gap-3">
           <div className="flex-1 flex relative flex-col text-warning rounded-xl shadow bg-white p-4">
             <Button
-              size={"icon"}
-              variant={"secondary"}
+              isIconOnly
+              variant="secondary"
               className="text-warning bg-warning-50 mb-2"
+              onPress={() => auth.logout()}
             >
               <DollarSignIcon className="w-5! h-5!" />
             </Button>
@@ -103,16 +95,17 @@ const Home = () => {
             <p className="font-bold text-md">Rp 10.000</p>
             <Button
               className="top-2 right-2 absolute"
-              variant={"ghost"}
-              size={"icon-sm"}
+              variant="ghost"
+              isIconOnly
+              size="sm"
             >
               <ArrowUpRightFromSquareIcon className="w-4! h-4!" />
             </Button>
           </div>
           <div className="flex-1 flex relative flex-col text-primary rounded-xl shadow bg-white p-4">
             <Button
-              size={"icon"}
-              variant={"secondary"}
+              isIconOnly
+              variant="secondary"
               className="text-inherit bg-primary-50 mb-2"
             >
               <WalletIcon className="w-5! h-5!" />
@@ -123,8 +116,9 @@ const Home = () => {
             <p className="font-bold text-md font-poppins!">Rp 19.000.000</p>
             <Button
               className="top-2 right-2 absolute"
-              variant={"ghost"}
-              size={"icon-sm"}
+              variant="ghost"
+              isIconOnly
+              size="sm"
             >
               <ArrowUpRightFromSquareIcon className="w-4! h-4!" />
             </Button>

@@ -16,25 +16,25 @@ datasource db {
 model User {
   id             String  @id @default(cuid())
   email          String  @unique @db.Citext
-  phoneNumber    String? @unique @map("phone_number")
   hashedPassword String  @map("password_hash")
   name           String
   avatarUrl      String? @map("avatar_url")
   isVerified     Boolean @default(false) @map("is_verified")
 
   organizationId String? @map("organization_id")
-  role           Role?   @default(ANGGOTA)
+  role           Role?
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  organization         Organization?  @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  organization         Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
   details              UserDetail?
-  createdOrganizations Organization[] @relation("OrganizationCreator")
-  createdActivities    Activity[]     @relation("ActivityCreator")
-  createdAnnouncements Announcement[] @relation("AnnouncementCreator")
-  createdInvitations   Invitation[]   @relation("InvitationCreator")
+  createdOrganizations Organization[]      @relation("OrganizationCreator")
+  createdActivities    Activity[]          @relation("ActivityCreator")
+  createdAnnouncements Announcement[]      @relation("AnnouncementCreator")
+  createdInvitations   Invitation[]        @relation("InvitationCreator")
   attendees            Attendee[]
+  verificationTokens   VerificationToken[]
 
   @@index([organizationId])
   @@index([email])
@@ -102,7 +102,7 @@ model OrganizationSummary {
 
 model Invitation {
   id             String   @id @default(cuid())
-  email          String  @db.Citext
+  email          String   @db.Citext
   organizationId String   @map("organization_id")
   role           Role     @default(ANGGOTA)
   token          String   @unique
@@ -190,6 +190,24 @@ model Announcement {
   @@map("announcements")
 }
 
+model VerificationToken {
+  id        String                @id @default(cuid())
+  token     String                @unique
+  type      VerificationTokenType
+  isUsed    Boolean               @default(false) @map("is_used")
+  usedAt    DateTime?             @map("used_at")
+  userId    String                @map("user_id")
+  expiresAt DateTime              @map("expires_at")
+  createdAt DateTime              @default(now()) @map("created_at")
+  updatedAt DateTime              @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@map("verification_tokens")
+}
+
 enum Role {
   KETUA
   SEKRETARIS
@@ -213,4 +231,10 @@ enum ActivityType {
   GATHERING
   SEMINAR
   OTHER
+}
+
+enum VerificationTokenType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  EMAIL_CHANGE
 }

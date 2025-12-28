@@ -7,7 +7,7 @@ import {
   Wallet2Icon,
 } from "lucide-react";
 import React from "react";
-import { Button } from "../ui/button";
+import { Button } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
@@ -46,19 +46,16 @@ const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
       {...props}
     >
       {items.map((i) => (
-        <Button
-          key={i.href}
-          className="flex flex-1 flex-col gap-0 items-center text-muted-foreground data-[active=true]:text-primary"
-          variant={"ghost"}
-          data-active={pathname.match(i.regex) ? true : false}
-          size={"default"}
-          asChild
-        >
-          <Link href={i.href}>
+        <Link href={i.href} key={i.href}>
+          <Button
+            className="flex flex-1 flex-col gap-0 items-center text-muted-foreground data-[active=true]:text-primary"
+            variant={"ghost"}
+            data-active={pathname.match(i.regex) ? true : false}
+          >
             <i.icon className="w-5! h-5!" />
             <small>{i.label}</small>
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       ))}
     </nav>
   );

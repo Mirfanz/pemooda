@@ -3,13 +3,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Alert, Button, Chip } from "@heroui/react";
+import { Alert, Button, Chip, Divider } from "@heroui/react";
 import {
   MailCheckIcon,
   ArrowLeftIcon,
   RefreshCwIcon,
   CheckCircleIcon,
-  TriangleAlertIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import Verified from "./verified";
@@ -99,12 +98,22 @@ const Verify = () => {
   return (
     <main>
       <div className="text-center mb-8">
-        <Button className="size-18 shadow-lg mb-4 shadow-primary/40">
+        <Button
+          color="primary"
+          variant="shadow"
+          isIconOnly
+          className="size-18 rounded-3xl shadow-lg mb-4"
+        >
           <MailCheckIcon className="size-11" />
         </Button>
         <h1 className="text-3xl font-bold mb-2">Verify Account</h1>
         <p className="text-muted mb-4">
-          We&apos;ve sent a verification link to your email <Chip>{email}</Chip>
+          We&apos;ve sent a verification link to your email{" "}
+          {!!email && (
+            <Chip size="sm" variant="flat" as={"span"}>
+              {email}
+            </Chip>
+          )}
         </p>
       </div>
       <div className="bg-primary/5 rounded-lg p-6 mb-6">
@@ -117,21 +126,13 @@ const Verify = () => {
           browser, click the button below to update your session.
         </p>
 
-        {checkStatusMessage === "success" && (
-          <div className="bg-success/10 text-success p-4 rounded-lg text-sm mb-4">
-            ✓ Account verified! Redirecting to home...
-          </div>
-        )}
-
         {checkStatusMessage === "not-verified" && (
-          <Alert status="warning" className="bg-warning/5 mb-6">
-            <Alert.Indicator>
-              <TriangleAlertIcon className="size-4" />
-            </Alert.Indicator>
-            <Alert.Content>
-              <Alert.Title>Account Not Verified</Alert.Title>
-            </Alert.Content>
-          </Alert>
+          <Alert
+            description="This account is not verified yet."
+            variant="flat"
+            color="warning"
+            className="mb-3"
+          />
         )}
 
         {checkStatusMessage === "error" && (
@@ -141,15 +142,18 @@ const Verify = () => {
         )}
 
         <Button
-          fullWidth
-          variant="primary"
+          color="primary"
           onPress={handleCheckStatus}
-          isPending={isCheckingStatus}
+          isLoading={isCheckingStatus}
+          radius="full"
+          fullWidth
         >
-          {({ isPending }) => (
+          {isCheckingStatus ? (
+            "Checking Status..."
+          ) : (
             <>
-              <CheckCircleIcon className="size-4 mr-2" />
-              {isPending ? "Checking..." : "Check Verification Status"}
+              <CheckCircleIcon className="size-4" />
+              Check Status
             </>
           )}
         </Button>
@@ -164,9 +168,16 @@ const Verify = () => {
         </p>
 
         {resendSuccess ? (
-          <div className="bg-success/10 text-success p-4 rounded-lg text-sm">
-            ✓ Verification email sent successfully! Please check your inbox.
-          </div>
+          // <div className="bg-success/10 text-success p-4 rounded-lg text-sm">
+          //   ✓ Verification email sent successfully! Please check your inbox.
+          // </div>
+          <Alert
+            color="success"
+            variant="flat"
+            hideIcon
+            classNames={{ mainWrapper: "ms-0" }}
+            description="✓ Verification email sent successfully! Please check your inbox."
+          />
         ) : (
           <>
             {resendError && (
@@ -176,21 +187,27 @@ const Verify = () => {
             )}
             <Button
               fullWidth
-              variant="secondary"
+              variant="flat"
+              color="default"
               onPress={handleResend}
-              isPending={isResending}
+              isLoading={isResending}
+              radius="full"
+              className="text-primary"
             >
-              {({ isPending }) => (
+              {isResending ? (
+                "Sending..."
+              ) : (
                 <>
-                  <RefreshCwIcon className="size-4 mr-2" />
-                  {isPending ? "Sending..." : "Resend Verification Email"}
+                  <RefreshCwIcon className="size-4" />
+                  Resend Email
                 </>
               )}
             </Button>
           </>
         )}
       </div>
-      <div className="mt-6 pt-6 border-t border-border text-center">
+      <Divider orientation="horizontal" />
+      <div className="mt-6">
         <Button fullWidth variant="ghost" onPress={logout}>
           <ArrowLeftIcon className="size-4" />
           Back to Login

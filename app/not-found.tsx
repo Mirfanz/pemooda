@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@heroui/react";
 import Link from "next/link";
 
@@ -26,7 +28,7 @@ export default function NotFound() {
           </Link>
           <Button
             size="lg"
-            variant="secondary"
+            variant="ghost"
             className="bg-transparent border border-primary"
           >
             Contact Us

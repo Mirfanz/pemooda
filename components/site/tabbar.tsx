@@ -39,17 +39,14 @@ const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
   const pathname = usePathname();
   return (
     <nav
-      className={cn(
-        "p-3 bg-white shadow-sm border-t flex justify-evenly",
-        className
-      )}
+      className={cn("p-3 shadow-sm border-t flex justify-evenly", className)}
       {...props}
     >
       {items.map((i) => (
         <Link href={i.href} key={i.href}>
           <Button
             className="flex flex-1 flex-col gap-0 items-center text-muted-foreground data-[active=true]:text-primary"
-            variant={"ghost"}
+            variant={"light"}
             data-active={pathname.match(i.regex) ? true : false}
           >
             <i.icon className="w-5! h-5!" />

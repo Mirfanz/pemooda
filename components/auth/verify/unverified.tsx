@@ -2,8 +2,8 @@
 
 import { Button } from "@heroui/react";
 import {
+  AlertOctagonIcon,
   ArrowLeftIcon,
-  MailWarningIcon,
   TriangleAlertIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -12,8 +12,13 @@ const Unverified = ({ errorMessage }: { errorMessage: string }) => {
   return (
     <main>
       <div className="flex flex-col mb-6">
-        <Button className="size-18 shadow-lg mb-4 bg-danger shadow-danger/40">
-          <MailWarningIcon className="size-12" />
+        <Button
+          isIconOnly
+          color="danger"
+          variant="shadow"
+          className="size-18 rounded-3xl text-slate-50 shadow-lg mb-4"
+        >
+          <AlertOctagonIcon className="size-12" />
         </Button>
         <h1 className="text-2xl font-bold mb-2 text-danger flex gap-1 items-center">
           Verification Failed <TriangleAlertIcon className="size-6" />
@@ -23,7 +28,7 @@ const Unverified = ({ errorMessage }: { errorMessage: string }) => {
         </p>
       </div>
       <Link href={"/auth/verify"}>
-        <Button fullWidth variant="tertiary">
+        <Button fullWidth>
           <ArrowLeftIcon className="size-4" />
           Back To Verify Page
         </Button>

@@ -4,14 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
-import {
-  Button,
-  FieldError,
-  Form,
-  InputGroup,
-  Label,
-  TextField,
-} from "@heroui/react";
+import { Button, Form, Input } from "@heroui/react";
 import { EyeIcon, MailIcon, LockIcon, EyeClosedIcon } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
@@ -76,57 +69,54 @@ const Login = () => {
         <p className="">Sign in to your account to continue</p>
       </div>
 
-      <Form onSubmit={handleSubmit} className="space-y-3" autoComplete="off">
-        <TextField
+      <Form onSubmit={handleSubmit} className="space-y-2" autoComplete="on">
+        <Input
+          variant="flat"
           isRequired
           type="email"
+          classNames={{ helperWrapper: "pb-0!" }}
           onInput={handleChange}
           value={formData.email}
           name="email"
+          label="Email"
+          labelPlacement="outside-top"
+          placeholder="example@gmail.com"
           isInvalid={!!errors.email?.length || undefined}
-        >
-          <Label>Email</Label>
-          <InputGroup className={"h-10"}>
-            <InputGroup.Prefix>
-              <MailIcon className="size-4 text-muted" />
-            </InputGroup.Prefix>
-            <InputGroup.Input
-              className="w-full max-w-[280px]"
-              placeholder="name@email.com"
-            />
-          </InputGroup>
-          <FieldError>{errors.email?.[0]}</FieldError>
-        </TextField>
-        <TextField
-          isRequired
-          type={showPassword ? "text" : "password"}
-          name="password"
-          value={formData.password}
-          onInput={handleChange}
-          isInvalid={!!errors.password?.length || undefined}
-        >
-          <div className="flex items-center">
-            <Label>Password</Label>
+          errorMessage={errors.email?.[0]}
+          startContent={<MailIcon className="size-4 text-muted mr-1" />}
+        />
+
+        <div className="w-full">
+          <div className="flex w-full justify-between items-center mb-1">
+            <label className="text-sm">Password</label>
             <Link
               href={"/auth/forgot-password"}
-              className="ms-auto text text-xs hover:underline  text-primary"
+              className="text-xs text-primary"
             >
               Forgot Password?
             </Link>
           </div>
-          <InputGroup className="h-10">
-            <InputGroup.Prefix>
-              <LockIcon className="size-4" />
-            </InputGroup.Prefix>
-            <InputGroup.Input className="w-full" placeholder="••••••••" />
-            <InputGroup.Suffix className="pr-0.5">
+          <Input
+            variant="flat"
+            isRequired
+            type={showPassword ? "text" : "password"}
+            classNames={{ helperWrapper: "pb-0!" }}
+            name="password"
+            labelPlacement="outside-top"
+            placeholder="••••••••"
+            value={formData.password}
+            onInput={handleChange}
+            isInvalid={!!errors.password?.length || undefined}
+            errorMessage={errors.password?.[0]}
+            startContent={<LockIcon className="size-4 text-muted mr-1" />}
+            endContent={
               <Button
                 onPress={() => setShowPassword((prev) => !prev)}
-                className="rounded-xl"
+                className="-mr-2"
                 size="sm"
                 isIconOnly
                 type="button"
-                variant="ghost"
+                variant="light"
               >
                 {showPassword ? (
                   <EyeIcon className="size-4" />
@@ -134,10 +124,17 @@ const Login = () => {
                   <EyeClosedIcon className="size-4" />
                 )}
               </Button>
-            </InputGroup.Suffix>
-          </InputGroup>
-          <FieldError>{errors.password?.[0]}</FieldError>
-        </TextField>
+            }
+          />
+        </div>
+        {/* <div className="flex items-center">
+            <Link
+              href={"/auth/forgot-password"}
+              className="ms-auto text text-xs hover:underline  text-primary"
+            >
+              Forgot Password?
+            </Link>
+          </div> */}
 
         {errors.general && (
           <div className="text-sm text-danger bg-danger/10 p-3 rounded-lg">
@@ -147,11 +144,15 @@ const Login = () => {
 
         <Button
           type="submit"
-          className="w-full h-12 text-base font-semibold mt-4"
-          variant="primary"
-          isPending={isLoading}
+          className="mt-4"
+          fullWidth
+          variant="solid"
+          size="lg"
+          color="primary"
+          radius="full"
+          isLoading={isLoading}
         >
-          {({ isPending }) => (isPending ? "Signing in..." : "Sign In")}
+          {isLoading ? "Signing in..." : "Sign In"}
         </Button>
       </Form>
 

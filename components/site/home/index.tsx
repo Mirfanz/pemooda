@@ -27,7 +27,7 @@ const Home = () => {
             <p className="text-sm text-muted-foreground">Good Morning</p>
             <h4 className="font-bold">Muhammad Irfan</h4>
           </div>
-          <Button isIconOnly className="rounded-full ms-auto" variant="ghost">
+          <Button isIconOnly className="rounded-full ms-auto" variant="light">
             <BellRingIcon className="w-5! h-5!" />
           </Button>
         </div>
@@ -46,32 +46,16 @@ const Home = () => {
               Memayu hayuning bawana
             </p>
             <div className="flex gap-2">
-              <Button
-                isIconOnly
-                variant="ghost"
-                className="outline-2! outline-white!"
-              >
+              <Button isIconOnly variant="light" className="">
                 <InstagramIcon className="w-5! h-5!" />
               </Button>
-              <Button
-                isIconOnly
-                variant="ghost"
-                className="outline-2! outline-white!"
-              >
+              <Button isIconOnly variant="light" className="">
                 <MessageSquareDotIcon className="w-5! h-5!" />
               </Button>
-              <Button
-                isIconOnly
-                variant="ghost"
-                className="outline-2! outline-white!"
-              >
+              <Button isIconOnly variant="light" className="">
                 <TwitterIcon className="w-5! h-5!" />
               </Button>
-              <Button
-                isIconOnly
-                variant="ghost"
-                className="outline-2! outline-white! ms-auto"
-              >
+              <Button isIconOnly variant="light" className="ms-auto">
                 <ListIcon className="w-5! h-5!" />
               </Button>
             </div>
@@ -83,7 +67,7 @@ const Home = () => {
           <div className="flex-1 flex relative flex-col text-warning rounded-xl shadow bg-white p-4">
             <Button
               isIconOnly
-              variant="secondary"
+              variant="flat"
               className="text-warning bg-warning-50 mb-2"
               onPress={() => auth.logout()}
             >
@@ -95,7 +79,7 @@ const Home = () => {
             <p className="font-bold text-md">Rp 10.000</p>
             <Button
               className="top-2 right-2 absolute"
-              variant="ghost"
+              variant="light"
               isIconOnly
               size="sm"
             >
@@ -105,7 +89,7 @@ const Home = () => {
           <div className="flex-1 flex relative flex-col text-primary rounded-xl shadow bg-white p-4">
             <Button
               isIconOnly
-              variant="secondary"
+              variant="flat"
               className="text-inherit bg-primary-50 mb-2"
             >
               <WalletIcon className="w-5! h-5!" />
@@ -116,7 +100,7 @@ const Home = () => {
             <p className="font-bold text-md font-poppins!">Rp 19.000.000</p>
             <Button
               className="top-2 right-2 absolute"
-              variant="ghost"
+              variant="light"
               isIconOnly
               size="sm"
             >

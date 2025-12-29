@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Button, FieldError, Form, InputGroup, TextField } from "@heroui/react";
+import { Button, Form, Input } from "@heroui/react";
 import {
   MailIcon,
   ArrowLeftIcon,
@@ -58,7 +58,11 @@ const ForgotPassword = () => {
   return (
     <main className="">
       <div className="flex flex-col mb-6">
-        <Button className="size-18 shadow-lg mb-4 shadow-primary/40">
+        <Button
+          className="rounded-3xl size-18 shadow-lg mb-4 shadow-primary/40"
+          color="primary"
+          isIconOnly
+        >
           <KeyRoundIcon className="size-10" />
         </Button>
         <h1 className="text-2xl font-bold mb-2">Forgot Password?</h1>
@@ -67,42 +71,24 @@ const ForgotPassword = () => {
         </p>
       </div>
       <Form onSubmit={handleSubmit} autoComplete="off">
-        <TextField
-          className="mb-6"
+        <Input
+          className="mb-4"
           name="email"
           value={email}
-          onChange={(val) => setEmail(val)}
+          onValueChange={(val) => setEmail(val)}
           isRequired
-        >
-          <InputGroup fullWidth className="h-11">
-            <InputGroup.Prefix>
-              <MailIcon className="size-4" />
-            </InputGroup.Prefix>
-            <InputGroup.Input
-              className=""
-              type="email"
-              placeholder="Your Email Address"
-            />
-          </InputGroup>
-          <FieldError />
-        </TextField>
+          placeholder="Your Email Address"
+          startContent={<MailIcon className="size-4 mr-1 text-muted" />}
+        />
         <Button
-          size="lg"
-          className="shadow-lg mb-4 shadow-primary/40"
+          className="shadow-lg mb-2"
           fullWidth
           type="submit"
-          isPending={isLoading}
+          isLoading={isLoading}
+          color="primary"
+          variant="shadow"
         >
-          {({ isPending }) => (isPending ? "Sending..." : "Send Reset Link")}
-        </Button>
-        <Button
-          size="lg"
-          type="button"
-          fullWidth
-          variant="ghost"
-          onPress={router.back}
-        >
-          <ArrowLeftIcon className="size-4" /> Go Back
+          {isLoading ? "Sending..." : "Send Reset Link"}
         </Button>
       </Form>
     </main>

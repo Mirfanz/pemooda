@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/auth-context";
+import { HeroUIProvider } from "@heroui/react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -17,5 +18,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
-  return <AuthProvider>{children}</AuthProvider>;
+  return (
+    <HeroUIProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </HeroUIProvider>
+  );
 }

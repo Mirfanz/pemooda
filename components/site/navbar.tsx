@@ -11,7 +11,7 @@ const Navbar = ({ className, ...props }: Props) => {
     <nav className={cn("p-3 bg-white shadow-sm z-50", className)} {...props}>
       <div className="flex items-center">
         <h1 className="text-lg font-semibold me-auto  font-sans">Pemooda</h1>
-        <Button className="" variant="secondary" isIconOnly>
+        <Button className="" variant="light" isIconOnly>
           <ListMinusIcon className="rotate-180" />
         </Button>
       </div>

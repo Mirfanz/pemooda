@@ -46,7 +46,12 @@ const Verifying = () => {
   return (
     <main>
       <div className="flex flex-col mb-6">
-        <Button className="size-18 shadow-lg mb-4 shadow-primary/40">
+        <Button
+          color="primary"
+          variant="shadow"
+          isIconOnly
+          className="size-18 shadow-lg mb-4 rounded-3xl"
+        >
           <MailCheckIcon className="size-12" />
         </Button>
         <h1 className="text-2xl font-bold mb-2">Verify Account</h1>
@@ -57,14 +62,17 @@ const Verifying = () => {
       </div>
 
       <Button
-        isPending={verifyStatus == "loading"}
+        isLoading={verifyStatus == "loading"}
         fullWidth
+        color="primary"
         onPress={handleVerify}
       >
-        {({ isPending }) => (
+        {verifyStatus === "loading" ? (
+          "Verifying..."
+        ) : (
           <>
             <MailCheckIcon className="size-4" />
-            {isPending ? "Verifying..." : "Verify Account"}
+            Verify Account
           </>
         )}
       </Button>

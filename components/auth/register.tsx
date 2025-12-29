@@ -4,15 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import {
-  Button,
-  Checkbox,
-  FieldError,
-  Form,
-  InputGroup,
-  Label,
-  TextField,
-} from "@heroui/react";
+import { Button, Checkbox, Form, Input } from "@heroui/react";
 import {
   EyeIcon,
   MailIcon,
@@ -34,7 +26,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [agreeTerms, setAgreeTerms] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(true);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -88,53 +80,43 @@ const Register = () => {
         <h1 className="text-3xl font-bold mb-1">Create Account</h1>
         <p>Join with us by creating an account</p>
       </div>
-      <Form className="space-y-3" onSubmit={handleSubmit} autoComplete="off">
-        <TextField
+      <Form className="space-y-2" onSubmit={handleSubmit} autoComplete="off">
+        <Input
           name="name"
           value={formData.name}
           onInput={handleChange}
           type="text"
+          classNames={{ helperWrapper: "pb-0!" }}
           isRequired
           minLength={3}
           isInvalid={!!errors.name?.length || undefined}
-        >
-          <Label>Full Name</Label>
-          <InputGroup className="h-10">
-            <InputGroup.Prefix>
-              <UserIcon className="size-4 text-muted" />
-            </InputGroup.Prefix>
-            <InputGroup.Input
-              className={"w-full"}
-              placeholder="Whats your name?"
-            />
-          </InputGroup>
-          <FieldError>{errors.name?.[0]}</FieldError>
-        </TextField>
-        <TextField
+          errorMessage={errors.name?.[0]}
+          label="Full Name"
+          placeholder="What's your name?"
+          labelPlacement="outside-top"
+          startContent={<UserIcon className="size-4 text-muted mr-1" />}
+        />
+
+        <Input
           name="email"
           value={formData.email}
           onInput={handleChange}
           type="email"
+          classNames={{ helperWrapper: "pb-0!" }}
           isRequired
           isInvalid={!!errors.email?.length || undefined}
-        >
-          <Label>Email Address</Label>
-          <InputGroup className="h-10">
-            <InputGroup.Prefix>
-              <MailIcon className="size-4 text-muted" />
-            </InputGroup.Prefix>
-            <InputGroup.Input
-              className={"w-full"}
-              placeholder="example@email.com"
-            />
-          </InputGroup>
-          <FieldError>{errors.email?.[0]}</FieldError>
-        </TextField>
-        <TextField
+          errorMessage={errors.email?.[0]}
+          label="Email Address"
+          placeholder="example@email.com"
+          labelPlacement="outside-top"
+          startContent={<MailIcon className="size-4 text-muted mr-1" />}
+        />
+        <Input
           name="password"
           value={formData.password}
           onInput={handleChange}
           type={showPassword ? "text" : "password"}
+          classNames={{ helperWrapper: "pb-0!" }}
           isRequired
           validate={(val) => {
             if (val.length < 8) return "Password must be at least 8 characters";
@@ -143,79 +125,70 @@ const Register = () => {
             return true;
           }}
           isInvalid={!!errors.password?.length || undefined}
-        >
-          <Label>Password</Label>
-          <InputGroup className="h-10">
-            <InputGroup.Prefix>
-              <LockIcon className="size-4 text-muted" />
-            </InputGroup.Prefix>
-            <InputGroup.Input className={"w-full"} placeholder="••••••••" />
-            <InputGroup.Suffix className="pr-0.5">
-              <Button
-                isIconOnly
-                variant="ghost"
-                onPress={() => setShowPassword((prev) => !prev)}
-              >
-                {showPassword ? (
-                  <EyeIcon className="size-4" />
-                ) : (
-                  <EyeClosedIcon className="size-4" />
-                )}
-              </Button>
-            </InputGroup.Suffix>
-          </InputGroup>
-          <FieldError>{errors.password?.[0]}</FieldError>
-        </TextField>
-        <TextField
+          errorMessage={errors.password?.[0]}
+          label="Password"
+          labelPlacement="outside-top"
+          placeholder="••••••••"
+          startContent={<LockIcon className="size-4 text-muted mr-1" />}
+          endContent={
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              className="-me-2"
+              onPress={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? (
+                <EyeIcon className="size-4" />
+              ) : (
+                <EyeClosedIcon className="size-4" />
+              )}
+            </Button>
+          }
+        />
+        <Input
           name="confirm_password"
           value={formData.confirm_password}
           onInput={handleChange}
           type={showConfirmPassword ? "text" : "password"}
+          classNames={{ helperWrapper: "pb-0!" }}
           isRequired
           validate={(val) => {
             if (val != formData.password) return "Password didn't match";
             return true;
           }}
-        >
-          <Label>Confirm Password</Label>
-          <InputGroup className="h-10">
-            <InputGroup.Prefix>
-              <LockKeyholeIcon className="size-4 text-muted" />
-            </InputGroup.Prefix>
-            <InputGroup.Input className={"w-full"} placeholder="••••••••" />
-            <InputGroup.Suffix className="pr-0.5">
-              <Button
-                isIconOnly
-                variant="ghost"
-                onPress={() => setShowConfirmPassword((prev) => !prev)}
-              >
-                {showConfirmPassword ? (
-                  <EyeIcon className="size-4" />
-                ) : (
-                  <EyeClosedIcon className="size-4" />
-                )}
-              </Button>
-            </InputGroup.Suffix>
-          </InputGroup>
-          <FieldError />
-        </TextField>
+          label="Confirm Password"
+          labelPlacement="outside-top"
+          placeholder="••••••••"
+          startContent={<LockKeyholeIcon className="size-4 text-muted mr-1" />}
+          endContent={
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              className="-me-2"
+              onPress={() => setShowConfirmPassword((prev) => !prev)}
+            >
+              {showConfirmPassword ? (
+                <EyeIcon className="size-4" />
+              ) : (
+                <EyeClosedIcon className="size-4" />
+              )}
+            </Button>
+          }
+        />
         <div className="flex gap-3 items-center">
-          <Checkbox isSelected={agreeTerms} onChange={setAgreeTerms}>
-            <Checkbox.Control>
-              <Checkbox.Indicator />
-            </Checkbox.Control>
-            <Checkbox.Content className="font-normal text-sm items-center">
-              <p className="">
-                I agree to the{" "}
-                <Link href="#" className="text-primary hover:underline">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link href="#" className="text-primary hover:underline">
-                  Privacy Policy
-                </Link>
-              </p>
-            </Checkbox.Content>
+          <Checkbox isSelected={agreeTerms} onValueChange={setAgreeTerms}>
+            <p className="text-sm">
+              I agree to the{" "}
+              <Link href="#" className="text-primary hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link href="#" className="text-primary hover:underline">
+                Privacy Policy
+              </Link>
+            </p>
           </Checkbox>
         </div>
 
@@ -227,14 +200,15 @@ const Register = () => {
 
         <Button
           size="lg"
-          isPending={isLoading}
+          isLoading={isLoading}
           type="submit"
           fullWidth
           className="mt-3"
+          variant="shadow"
+          color="primary"
+          radius="full"
         >
-          {({ isPending }) =>
-            isPending ? "Creating Account..." : "Create Account"
-          }
+          {isLoading ? "Creating Account..." : "Create Account"}
         </Button>
       </Form>
       <div className="mt-6 text-center">

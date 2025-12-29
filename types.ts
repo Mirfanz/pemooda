@@ -1,4 +1,9 @@
 import { Role } from "@/lib/generated/prisma/enums";
+import { SVGProps } from "react";
+
+export type IconSvgProps = SVGProps<SVGSVGElement> & {
+  size?: number;
+};
 
 export interface UserOrganization {
   id: string;

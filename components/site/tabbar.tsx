@@ -1,59 +1,73 @@
 "use client";
 
-import {
-  BellDotIcon,
-  CalendarFoldIcon,
-  HomeIcon,
-  Wallet2Icon,
-} from "lucide-react";
-import React from "react";
-import { Button } from "@heroui/react";
+import React, { useMemo } from "react";
+import { Tab, Tabs } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import {
+  BellBoldIcon,
+  CalendarBoldIcon,
+  HomeBoldIcon,
+  UserBoldIcon,
+  WalletBoldIcon,
+} from "../icons";
 
 const items = [
-  { label: "Home", icon: HomeIcon, href: "/", regex: /^\/$/ },
+  { label: "Home", icon: HomeBoldIcon, href: "/", regex: /^\/$/ },
   {
     label: "Event",
-    icon: CalendarFoldIcon,
+    icon: CalendarBoldIcon,
     href: "/event",
     regex: /^\/event/,
   },
   {
     label: "Finance",
-    icon: Wallet2Icon,
+    icon: WalletBoldIcon,
     href: "/finance",
     regex: /^\/finance/,
   },
   {
     label: "Notif",
-    icon: BellDotIcon,
+    icon: BellBoldIcon,
     href: "/notification",
     regex: /^\/notification/,
   },
-  // { label: "Account", icon: User2Icon, href: "/account", regex: /^\/account/ },
+  {
+    label: "Account",
+    icon: UserBoldIcon,
+    href: "/account",
+    regex: /^\/account/,
+  },
 ];
 
 const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
   const pathname = usePathname();
+
+  const activeTab = useMemo(() => {
+    const matchingItem = items.find((item) => item.regex.test(pathname));
+    return matchingItem?.href || null;
+  }, [pathname]);
+
   return (
-    <nav
-      className={cn("p-3 shadow-sm border-t flex justify-evenly", className)}
-      {...props}
-    >
-      {items.map((i) => (
-        <Link href={i.href} key={i.href}>
-          <Button
-            className="flex flex-1 flex-col gap-0 items-center text-muted-foreground data-[active=true]:text-primary"
-            variant={"light"}
-            data-active={pathname.match(i.regex) ? true : false}
-          >
-            <i.icon className="w-5! h-5!" />
-            <small>{i.label}</small>
-          </Button>
-        </Link>
-      ))}
+    <nav className={cn(className)} {...props}>
+      <Tabs
+        className="p-3"
+        fullWidth
+        variant="solid"
+        selectedKey={activeTab}
+        color="primary"
+        size="lg"
+      >
+        {items.map((item) => (
+          <Tab
+            key={item.href}
+            as={Link}
+            href={item.href}
+            title={<item.icon className="size-4.5" />}
+          />
+        ))}
+      </Tabs>
     </nav>
   );
 };

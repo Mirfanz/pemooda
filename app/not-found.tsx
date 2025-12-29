@@ -22,13 +22,14 @@ export default function NotFound() {
 
         <div className="flex gap-4 justify-center">
           <Link href={"/"}>
-            <Button size="lg" className="animated-button">
+            <Button size="lg" color="primary" className="animated-button">
               Go Home
             </Button>
           </Link>
           <Button
             size="lg"
             variant="ghost"
+            color="primary"
             className="bg-transparent border border-primary"
           >
             Contact Us

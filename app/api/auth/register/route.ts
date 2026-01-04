@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { randomBytes } from "crypto";
 import { z } from "zod";
+import { User } from "@/types";
 
 const registerSchema = z.object({
   name: z
@@ -44,6 +45,7 @@ export async function POST(req: NextRequest) {
     // Cek apakah email sudah terdaftar
     const existingUser = await prisma.user.findUnique({
       where: { email },
+      select: { id: true },
     });
 
     if (existingUser) {
@@ -81,8 +83,6 @@ export async function POST(req: NextRequest) {
           name: true,
           avatarUrl: true,
           isVerified: true,
-          role: true,
-          createdAt: true,
         },
       });
 
@@ -105,12 +105,12 @@ export async function POST(req: NextRequest) {
       console.error("Gagal mengirim email verifikasi:", emailError);
     }
 
-    const userPayload = {
+    const userPayload: User = {
       id: user.id,
       name: user.name,
       avatarUrl: user.avatarUrl,
       isVerified: user.isVerified,
-      role: user.role,
+      role: null,
       organization: null,
     };
 

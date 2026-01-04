@@ -10,10 +10,10 @@ import {
 } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { UserType } from "@/types";
+import { User } from "@/types";
 
 interface AuthContextType {
-  user: UserType | null;
+  user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;
   logout: () => Promise<void>;
@@ -23,7 +23,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserType | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 

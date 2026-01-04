@@ -49,8 +49,15 @@ export async function POST() {
     const verificationToken = randomBytes(32).toString("hex");
     const tokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 jam
 
-    // Hapus token lama yang belum digunakan dan buat token baru
     await prisma.$transaction(async (tx) => {
+      // Hapus token lama yang belum digunakan
+      await tx.verificationToken.deleteMany({
+        where: {
+          userId: user.id,
+          usedAt: null,
+          expiresAt: { gt: new Date() },
+        },
+      });
       // Buat token baru
       await tx.verificationToken.create({
         data: {

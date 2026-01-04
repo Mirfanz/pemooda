@@ -1,15 +1,19 @@
 "use client";
 
 import React from "react";
-import { Button, Input } from "@heroui/react";
+import { Avatar, Button, Card, CardBody } from "@heroui/react";
 import {
   ArrowUpRightFromSquareIcon,
   BellRingIcon,
   DollarSignIcon,
-  SearchIcon,
   WalletIcon,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
+import {
+  InstagramIcon,
+  WhatsappIcon,
+  TwitterXIcon,
+} from "@/components/icons";
 
 const Home = () => {
   const auth = useAuth();
@@ -17,48 +21,17 @@ const Home = () => {
     <main className="">
       <div className="bg-white shadow-xl rounded-b-3xl p-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-bold outline-2 outline-offset-2 outline-secondary">
-            MI
-          </div>
+          <Avatar src={auth.user?.avatarUrl || undefined} isBordered />
           <div className="">
             <p className="text-sm text-muted-foreground">Good Morning</p>
-            <h4 className="font-bold">Muhammad Irfan</h4>
+            <h4 className="font-bold">{auth.user?.name}</h4>
           </div>
           <Button isIconOnly className="rounded-full ms-auto" variant="light">
             <BellRingIcon className="w-5! h-5!" />
           </Button>
         </div>
-        {/* <div className="relative bg-linear-to-br from-[#5046E5] to-[#6C2ADA] shadow text-white rounded-2xl p-4">
-          <div className="w-32 h-32 translate-x-10 -translate-y-10 opacity-10 bg-white rounded-full absolute top-0 right-0"></div>
-          <div className="relative">
-            <div className="mb-4">
-              <span className="uppercase bg-white/20 rounded-sm text-white text-xs px-2 py-1 inline-block">
-                Kartu Anggota
-              </span>
-            </div>
-            <h3 className="font-bold text-xl mb-1 font-poppins text-center">
-              GARDA TAMA
-            </h3>
-            <p className="text-sm text-white/80 mb-3 text-center">
-              Memayu hayuning bawana
-            </p>
-            <div className="flex gap-2">
-              <Button isIconOnly variant="light" className="">
-                <InstagramIcon className="w-5! h-5!" />
-              </Button>
-              <Button isIconOnly variant="light" className="">
-                <MessageSquareDotIcon className="w-5! h-5!" />
-              </Button>
-              <Button isIconOnly variant="light" className="">
-                <TwitterIcon className="w-5! h-5!" />
-              </Button>
-              <Button isIconOnly variant="light" className="ms-auto">
-                <ListIcon className="w-5! h-5!" />
-              </Button>
-            </div>
-          </div>
-        </div> */}
-        {/* <Card className="bg-linear-to-br relative from-[#5046E5] to-[#6C2ADA] text-white">
+
+        <Card className="bg-linear-to-br relative from-[#5046E5] to-[#6C2ADA] text-white">
           <CardBody className="overflow-hidden">
             <div className="w-32 h-32 translate-x-10 -translate-y-10 opacity-10 bg-white rounded-full absolute top-0 right-0"></div>
             <div className="relative">
@@ -68,33 +41,51 @@ const Home = () => {
                 </span>
               </div>
               <h3 className="font-bold text-xl mb-1 font-poppins text-center">
-                GARDA TAMA
+                {auth.user?.organization?.name}
               </h3>
               <p className="text-sm text-white/80 mb-3 text-center">
-                Memayu hayuning bawana
+                {auth.user?.organization?.tagline}
               </p>
-              <div className="flex gap-2">
-                <Button isIconOnly variant="light" className="">
-                  <InstagramIcon className="w-5! h-5!" />
+              <div className="flex gap-6 justify-center">
+                <Button
+                  size="sm"
+                  variant="bordered"
+                  color="default"
+                  isIconOnly
+                  className="text-primary-foreground"
+                >
+                  <InstagramIcon className="size-4" />
                 </Button>
-                <Button isIconOnly variant="light" className="">
-                  <MessageSquareDotIcon className="w-5! h-5!" />
+                <Button
+                  size="sm"
+                  variant="bordered"
+                  color="default"
+                  isIconOnly
+                  className="text-primary-foreground"
+                >
+                  <TwitterXIcon className="size-4" />
                 </Button>
-                <Button isIconOnly variant="light" className="">
-                  <TwitterIcon className="w-5! h-5!" />
+                <Button
+                  size="sm"
+                  variant="bordered"
+                  color="default"
+                  isIconOnly
+                  className="text-primary-foreground"
+                >
+                  <WhatsappIcon className="size-4" />
                 </Button>
-                <Button isIconOnly variant="light" className="ms-auto">
-                  <ListIcon className="w-5! h-5!" />
-                </Button>
+                {/* <Button isIconOnly variant="light" className="ms-auto">
+                  <SettingIcon className="w-5! h-5!" />
+                </Button> */}
               </div>
             </div>
           </CardBody>
-        </Card> */}
-        <Input
+        </Card>
+        {/* <Input
           type="search"
           startContent={<SearchIcon className="size-4 me-1" />}
           placeholder="Cari sesuatu disini"
-        />
+        /> */}
       </div>
       <div className="p-4">
         <div className="flex gap-3">
@@ -143,27 +134,6 @@ const Home = () => {
           </div>
         </div>
       </div>
-      <section className="mx-4">
-        <p className="text-justify">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Ex eius
-          blanditiis dolor soluta amet quibusdam incidunt officia. Ducimus quae
-          assumenda sapiente cumque aliquid fugit reprehenderit quis aperiam
-          maiores consequuntur illum quidem, cum, autem modi odio officia saepe
-          nobis nesciunt temporibus voluptatem qui! Delectus alias consequuntur
-          corrupti animi harum ab consectetur, illum ipsa dolorem recusandae
-          rerum officia inventore minus iusto similique voluptate eum eveniet
-          voluptatibus illo a, cumque soluta aliquam temporibus repellendus!
-          Voluptatum quis nisi eligendi, aliquid a ducimus earum natus est
-          molestiae commodi consequatur. Odit, autem eaque quidem veritatis vel
-          voluptatibus consectetur natus aliquam quaerat harum perspiciatis unde
-          recusandae. Harum odit placeat voluptatum laudantium inventore aut
-          rerum nesciunt id hic necessitatibus nam iure animi ducimus eos velit
-          dolores sint asperiores corporis assumenda recusandae voluptatibus,
-          voluptas quidem. Laudantium repellendus harum, exercitationem ducimus
-          incidunt eos veritatis explicabo porro nam. Quam, ullam adipisci quia
-          odit labore nobis dicta nisi quos quaerat quibusdam reprehenderit?
-        </p>
-      </section>
     </main>
   );
 };

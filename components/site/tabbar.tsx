@@ -16,10 +16,10 @@ import {
 const items = [
   { label: "Home", icon: HomeBoldIcon, href: "/", regex: /^\/$/ },
   {
-    label: "Event",
+    label: "Activity",
     icon: CalendarBoldIcon,
-    href: "/event",
-    regex: /^\/event/,
+    href: "/activity",
+    regex: /^\/activity/,
   },
   {
     label: "Finance",
@@ -28,10 +28,10 @@ const items = [
     regex: /^\/finance/,
   },
   {
-    label: "Notif",
+    label: "Announcement",
     icon: BellBoldIcon,
-    href: "/notification",
-    regex: /^\/notification/,
+    href: "/announcement",
+    regex: /^\/announcement/,
   },
   {
     label: "Account",
@@ -52,7 +52,7 @@ const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
   return (
     <nav className={cn(className)} {...props}>
       <Tabs
-        className="p-3"
+        className="py-2 px-4"
         fullWidth
         variant="solid"
         selectedKey={activeTab}

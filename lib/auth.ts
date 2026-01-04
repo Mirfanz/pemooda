@@ -1,20 +1,16 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { UserType, JWTPayload } from "@/types";
+import { User, JWTPayload } from "@/types";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const COOKIE_NAME = "auth_token";
 const TOKEN_EXPIRY = 7 * 24 * 60 * 60;
 
-export async function createToken(user: UserType): Promise<string> {
+export async function createToken(user: User): Promise<string> {
   const token = await new SignJWT({
     sub: user.id,
-    name: user.name,
-    avatarUrl: user.avatarUrl,
-    isVerified: user.isVerified,
-    role: user.role,
-    organization: user.organization,
+    user: user,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -54,19 +50,12 @@ export async function removeAuthCookie(): Promise<void> {
   cookieStore.delete(COOKIE_NAME);
 }
 
-export async function getCurrentUser(): Promise<UserType | null> {
+export async function getCurrentUser(): Promise<User | null> {
   const token = await getAuthCookie();
   if (!token) return null;
 
   const payload = await verifyToken(token);
   if (!payload) return null;
 
-  return {
-    id: payload.sub,
-    name: payload.name,
-    avatarUrl: payload.avatarUrl,
-    isVerified: payload.isVerified,
-    role: payload.role,
-    organization: payload.organization,
-  };
+  return payload.user;
 }

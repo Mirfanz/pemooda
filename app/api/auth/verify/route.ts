@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getCurrentUser, createToken, setAuthCookie } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
+import { User } from "@/types";
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          message: "Access denied",
+          message: "Tidak Terautentikasi",
         },
         { status: 400 }
       );
@@ -57,6 +58,7 @@ export async function POST(req: NextRequest) {
                 id: true,
                 name: true,
                 tagline: true,
+                imageUrl: true,
               },
             },
           },
@@ -112,7 +114,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Update JWT
-    const updatedUserPayload = {
+    const updatedUserPayload: User = {
       id: verificationToken.user.id,
       name: verificationToken.user.name,
       avatarUrl: verificationToken.user.avatarUrl,

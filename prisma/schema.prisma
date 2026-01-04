@@ -57,6 +57,7 @@ model UserDetail {
 model Organization {
   id        String   @id @default(cuid())
   name      String
+  imageUrl  String?  @map("image_url")
   tagline   String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -124,9 +125,10 @@ model Activity {
   description    String?
   notes          String[]
   type           ActivityType
+  isPublic       Boolean      @default(false) @map("is_public")
   startDate      DateTime     @map("start_date")
   endDate        DateTime?    @map("end_date")
-  location       String?
+  location       String
   mapsUrl        String?      @map("maps_url")
   organizationId String       @map("organization_id")
   createdBy      String       @map("created_by")
@@ -138,6 +140,7 @@ model Activity {
   attendances  Attendance[]
 
   @@index([organizationId])
+  @@index([isPublic])
   @@index([createdBy])
   @@map("activities")
 }

@@ -1,19 +1,26 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
+import { User } from "./types";
 
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET);
 
 const COOKIE_NAME = "auth_token";
 
 // Routes yang memerlukan autentikasi dan akun terverifikasi
-const protectedRoutes = ["/", "/event", "/finance"];
+const protectedRoutes = [
+  "/",
+  "/activity",
+  "/finance",
+  "/announcement",
+  "/account",
+];
 
 // Routes yang hanya bisa diakses jika TIDAK login
-const guestOnlyRoutes = ["/auth/login", "/auth/register"];
+const guestOnlyRoutes = ["/auth/login", "/auth/register", "/forgot-password"];
 
 // Routes yang hanya bisa diakses jika login tapi BELUM terverifikasi
-const unverifiedOnlyRoutes = ["/auth/verify"];
+const unverifiedOnlyRoutes = ["/auth/verify", "/change-password"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -49,7 +56,8 @@ export async function proxy(request: NextRequest) {
   // Ada token, verifikasi
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    const isVerified = payload.isVerified as boolean;
+    const user: User = payload.user as User;
+    const isVerified: boolean = user.isVerified;
 
     // User sudah login mencoba akses guest only route → redirect ke home
     if (isGuestOnlyRoute) {
@@ -71,6 +79,9 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/auth/verify", request.url));
     }
 
+    if (pathname == "/organization/new" && user.organization != null)
+      return NextResponse.redirect(new URL("/organization", request.url));
+
     return NextResponse.next();
   } catch {
     // Token tidak valid, hapus cookie
@@ -85,12 +96,18 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/auth/login",
+    "/auth/register",
+    "/auth/change-password",
+    "/auth/forgot-password",
+    "/auth/verify",
+    "/auth/verify/:token*",
     "/",
     "/event/:path*",
     "/finance/:path*",
-    "/auth/login",
-    "/auth/register",
-    "/auth/verify",
-    "/auth/verify/:token*",
+    "/activity/:path*",
+    "/announcement/:path*",
+    "/account/:path*",
+    "/organization/:path*",
   ],
 };

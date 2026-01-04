@@ -1,5 +1,6 @@
 import { getCurrentUser, createToken, setAuthCookie } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { User } from "@/types";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -30,6 +31,7 @@ export async function GET() {
             id: true,
             name: true,
             tagline: true,
+            imageUrl: true,
           },
         },
       },
@@ -46,7 +48,7 @@ export async function GET() {
     }
 
     // Prepare user payload
-    const userPayload = {
+    const userPayload: User = {
       id: userFromDb.id,
       name: userFromDb.name,
       avatarUrl: userFromDb.avatarUrl,

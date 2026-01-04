@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { AuthProvider } from "@/contexts/auth-context";
-import { HeroUIProvider } from "@heroui/react";
+import { HeroUIProvider, ToastProvider } from "@heroui/react";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
@@ -20,6 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <HeroUIProvider>
+      <ToastProvider placement="top-center" toastOffset={60} />
       <AuthProvider>{children}</AuthProvider>
     </HeroUIProvider>
   );

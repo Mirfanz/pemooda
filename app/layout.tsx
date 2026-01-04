@@ -17,7 +17,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body
-        className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} antialiased min-h-dvh max-w-dvw overflow-x-hidden font-sans bg-linear-to-br bg-fixed from-primary-50 via-background to-primary-100`}
+        className={`${geistSans.variable} ${poppins.variable} ${geistMono.variable} antialiased min-h-dvh overflow-x-hidden font-sans bg-linear-to-br bg-fixed from-primary-50 via-background to-primary-100`}
       >
         <Providers>
           <div className="flex min-h-dvh">{children}</div>

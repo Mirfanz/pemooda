@@ -8,9 +8,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* --background: #f9fafb;
-  --foreground: oklch(0.141 0.005 285.823); */
-  --accent: #4f46e5;
+  --background: #f9fafb;
+  --foreground: oklch(0.141 0.005 285.823);
 }
 
 @theme inline {

@@ -16,6 +16,7 @@ interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;
+  hasRole: (role: string | string[], user?: User | null) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -41,6 +42,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
     }
   }, []);
+
+  const hasRole = useCallback(
+    (role: string | string[], userToCheck: User | null = user) => {
+      if (!userToCheck || !userToCheck.role) return false;
+      const roles = Array.isArray(role) ? role : [role];
+      return roles.includes(userToCheck.role);
+    },
+    [user]
+  );
 
   const logout = useCallback(async () => {
     try {
@@ -68,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isLoading,
         logout,
         refreshUser,
+        hasRole,
       }}
     >
       {children}

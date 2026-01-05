@@ -80,7 +80,7 @@ export async function proxy(request: NextRequest) {
     }
 
     if (pathname == "/organization/new" && user.organization != null)
-      return NextResponse.redirect(new URL("/organization", request.url));
+      return NextResponse.redirect(new URL("/", request.url));
 
     return NextResponse.next();
   } catch {

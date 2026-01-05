@@ -1,6 +1,6 @@
 "use client";
-import Home from "@/components/site/home";
+import OrganizationPage from "@/components/site/organization";
 
 export default function HomePage() {
-  return <Home />;
+  return <OrganizationPage />;
 }

@@ -14,6 +14,12 @@ export interface User {
   organization: Organization | null;
 }
 
+export interface UserMinimal {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+}
+
 export interface JWTPayload {
   sub: string;
   user: User;
@@ -26,6 +32,40 @@ export interface Organization {
   name: string;
   imageUrl: string | null;
   tagline: string | null;
+}
+
+export interface OrganizationSummary {
+  organizationId: string;
+  totalMembers: number;
+  totalActivities: number;
+}
+
+export interface OrganizationFull extends Organization {
+  summary: OrganizationSummary | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  creator: UserMinimal;
+  address: string | null;
+  phone: string | null;
+  instagramUrl: string | null;
+  facebookUrl: string | null;
+  twitterUrl: string | null;
+}
+export interface OrganizationUser {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  role: Role | null;
+}
+
+export interface OrganizationInvitation {
+  id: string;
+  email: string;
+  role: Role;
+  createdAt: Date | string;
+  expiresAt: Date | string;
+  organization: Organization;
+  creator: UserMinimal;
 }
 
 export type ActivityStatus = "upcoming" | "ongoing" | "ended";

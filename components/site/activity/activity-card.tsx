@@ -2,14 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { ActivityStatus, Activity } from "@/types";
-import {
-  Avatar,
-  AvatarGroup,
-  Button,
-  Card,
-  CardBody,
-  Chip,
-} from "@heroui/react";
+import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import {
   CalendarIcon,
   CheckCircle2Icon,
@@ -113,29 +106,30 @@ const ActivityCard = ({ event }: Props) => {
           </div>
 
           <div className="flex items-center justify-between pt-3 border-t">
-            <div className="flex items-center gap-2">
-              <AvatarGroup size="sm" max={3}>
-                <Avatar
-                  src="https://i.pravatar.cc/150?u=a042581f4e29026024d"
-                  name="User 1"
-                />
-                <Avatar
-                  src="https://i.pravatar.cc/150?u=a04258a2462d826712d"
-                  name="User 2"
-                />
-                <Avatar
-                  src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                  name="User 3"
-                />
-              </AvatarGroup>
-              <span className="text-sm text-muted-foreground">
-                {80}/{100} peserta
-              </span>
-            </div>
+            {/* <div className="flex items-center gap-2">
+              <Avatar
+                src="https://i.pravatar.cc/150?u=a042581f4e29026024d"
+                name="User 1"
+              />
+              <span className="text-sm text-muted-foreground">Alcatraz</span>
+            </div> */}
+            <User
+              avatarProps={{
+                src: event.organization.imageUrl || undefined,
+                className: "",
+              }}
+              name={event.organization.name}
+              description={event.organization.tagline}
+              classNames={{
+                description: "line-clamp-1",
+                wrapper: "flex-1",
+              }}
+            />
 
             {event.status === "upcoming" && (
               <Button
                 size="sm"
+                className="hidden"
                 color={event.isPublic ? "default" : "primary"}
                 variant={event.isPublic ? "flat" : "solid"}
                 startContent={

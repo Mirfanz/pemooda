@@ -21,7 +21,7 @@ const Navbar = ({
   const router = useRouter();
   return (
     <nav className={cn("sticky top-0 z-50", className)} {...props}>
-      <div className="flex items-center bg-primary-50 px-4 py-3 rousnded-b-2xl text-foreground gap-2.5">
+      <div className="flex items-center bg-white shadow-sm  px-4 py-3 rousnded-b-2xl text-foreground gap-2.5">
         <Button
           isIconOnly
           size="sm"
@@ -31,7 +31,7 @@ const Navbar = ({
         >
           <ArrowLeftIcon className="size-5" />
         </Button>
-        {!hideTitle && <h1 className="font-semibold">{title}</h1>}
+        {!hideTitle && <h1 className="font-semibold me-auto">{title}</h1>}
         {endContent}
       </div>
     </nav>

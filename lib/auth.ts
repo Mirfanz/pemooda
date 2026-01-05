@@ -59,3 +59,11 @@ export async function getCurrentUser(): Promise<User | null> {
 
   return payload.user;
 }
+
+export function hasRole(role: string | null, allowedRoles: string | string[]) {
+  if (!role) return false;
+  const checkRoles = Array.isArray(allowedRoles)
+    ? allowedRoles
+    : [allowedRoles];
+  return checkRoles.includes(role);
+}

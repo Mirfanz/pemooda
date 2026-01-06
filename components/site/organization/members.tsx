@@ -22,21 +22,19 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { MailPlusIcon, TrashIcon, UserCogIcon, XIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { OrganizationUser } from "@/types";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@/lib/generated/prisma/enums";
 import Navbar from "../navbar";
-
-interface Invitation {
-  id: string;
-  email: string;
-  role: Role;
-  createdAt: string;
-  expiresAt: string;
-  creator: { id: string; name: string };
-}
+import {
+  useOrganizationMembers,
+  useOrganizationInvitations,
+  useInviteMember,
+  useUpdateMemberRole,
+  useRemoveMember,
+  useCancelInvitation,
+} from "@/hooks/queries/organization";
+import { OrganizationInvitation, OrganizationUser } from "@/types";
 
 const roleLabels: Record<string, string> = {
   KETUA: "Ketua",
@@ -62,9 +60,6 @@ const roleColors: Record<
 export default function OrganizationUsers() {
   const auth = useAuth();
   const router = useRouter();
-  const [members, setMembers] = useState<OrganizationUser[]>([]);
-  const [invitations, setInvitations] = useState<Invitation[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState("members");
 
   const inviteModal = useDisclosure();
@@ -74,173 +69,119 @@ export default function OrganizationUsers() {
 
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState<Role>("ANGGOTA");
-  const [inviting, setInviting] = useState(false);
 
   const [selectedMember, setSelectedMember] = useState<OrganizationUser | null>(
     null
   );
   const [selectedInvitation, setSelectedInvitation] =
-    useState<Invitation | null>(null);
+    useState<OrganizationInvitation | null>(null);
   const [newRole, setNewRole] = useState<Role>("ANGGOTA");
-  const [updatingRole, setUpdatingRole] = useState(false);
-  const [removing, setRemoving] = useState(false);
-  const [cancelingInvite, setCancelingInvite] = useState(false);
 
-  const isKetua = auth.user?.role === "KETUA";
+  const isKetua = auth.hasRole(Role.KETUA);
 
-  useEffect(() => {
-    if (!auth.user?.organization) {
-      router.push("/");
-      return;
-    }
-    fetchData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [auth.user?.organization, router]);
+  const members = useOrganizationMembers();
+  const invitations = useOrganizationInvitations();
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const [membersRes, invitationsRes] = await Promise.all([
-        axios.get("/api/organization/members"),
-        isKetua
-          ? axios.get("/api/organization/invitations")
-          : Promise.resolve({ data: { data: [] } }),
-      ]);
-      if (membersRes.data.success) setMembers(membersRes.data.data);
-      if (invitationsRes.data.data) setInvitations(invitationsRes.data.data);
-    } catch {
-      addToast({
-        title: "Error",
-        description: "Gagal memuat data",
-        color: "danger",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const inviteMemberMutation = useInviteMember();
+  const updateRoleMutation = useUpdateMemberRole();
+  const removeMemberMutation = useRemoveMember();
+  const cancelInvitationMutation = useCancelInvitation();
+
+  // useEffect(() => {
+  //   if (!auth.user?.organization && !auth.isLoading) {
+  //     router.push("/");
+  //     return;
+  //   }
+  // }, [auth.user?.organization, router, auth.isLoading]);
 
   const handleInvite = async () => {
     if (!inviteEmail) return;
-    setInviting(true);
-    try {
-      const res = await axios.post("/api/organization/invitations", {
-        email: inviteEmail,
-        role: inviteRole,
-      });
-      if (res.data.success) {
+    inviteMemberMutation
+      .mutateAsync({ email: inviteEmail, role: inviteRole })
+      .then((resp) => {
         addToast({
-          title: "Berhasil",
           description: "Undangan berhasil dikirim",
           color: "success",
         });
-        setInvitations([res.data.data, ...invitations]);
         setInviteEmail("");
         setInviteRole("ANGGOTA");
         inviteModal.onClose();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          color: "danger",
+          description: error.response?.data?.message || error.message,
+        });
       });
-    } finally {
-      setInviting(false);
-    }
   };
 
   const handleUpdateRole = async () => {
     if (!selectedMember) return;
-    setUpdatingRole(true);
-    try {
-      const res = await axios.put("/api/organization/members", {
+
+    updateRoleMutation
+      .mutateAsync({
         memberId: selectedMember.id,
         role: newRole,
-      });
-      if (res.data.success) {
+      })
+      .then((resp) => {
         addToast({
-          title: "Berhasil",
           description: "Role berhasil diperbarui",
           color: "success",
         });
-        if (newRole === "KETUA") {
-          auth.refreshUser();
-        }
-        fetchData();
+        if (newRole === "KETUA") auth.refreshUser();
         roleModal.onClose();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          color: "danger",
+          description: error.response?.data?.message || error.message,
+        });
       });
-    } finally {
-      setUpdatingRole(false);
-    }
   };
 
   const handleRemoveMember = async () => {
     if (!selectedMember) return;
-    setRemoving(true);
-    try {
-      const res = await axios.delete("/api/organization/members", {
-        data: { memberId: selectedMember.id },
-      });
-      if (res.data.success) {
+    removeMemberMutation
+      .mutateAsync({ memberId: selectedMember.id })
+      .then((res) => {
         addToast({
           title: "Berhasil",
           description: "Anggota berhasil dikeluarkan",
           color: "success",
         });
-        setMembers(members.filter((m) => m.id !== selectedMember.id));
         removeModal.onClose();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          description: error.response?.data?.message || error.message,
+          color: "danger",
+        });
       });
-    } finally {
-      setRemoving(false);
-    }
   };
 
   const handleCancelInvitation = async () => {
     if (!selectedInvitation) return;
-    setCancelingInvite(true);
-    try {
-      const res = await axios.delete("/api/organization/invitations", {
-        data: { invitationId: selectedInvitation.id },
-      });
-      if (res.data.success) {
+    cancelInvitationMutation
+      .mutateAsync({
+        invitationId: selectedInvitation.id,
+      })
+      .then(() => {
         addToast({
           title: "Berhasil",
           description: "Undangan dibatalkan",
           color: "success",
         });
-        setInvitations(
-          invitations.filter((i) => i.id !== selectedInvitation.id)
-        );
         cancelInviteModal.onClose();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          description: error.response?.data?.message || error.message,
+          color: "danger",
+        });
       });
-    } finally {
-      setCancelingInvite(false);
-    }
   };
 
-  const openCancelInviteModal = (invitation: Invitation) => {
+  const openCancelInviteModal = (invitation: OrganizationInvitation) => {
     setSelectedInvitation(invitation);
     cancelInviteModal.onOpen();
   };
@@ -255,17 +196,6 @@ export default function OrganizationUsers() {
     setSelectedMember(member);
     removeModal.onOpen();
   };
-
-  if (loading) {
-    return (
-      <main className="p-4 space-y-4">
-        <Skeleton className="h-10 w-32 rounded-lg" />
-        <Skeleton className="h-16 rounded-xl" />
-        <Skeleton className="h-16 rounded-xl" />
-        <Skeleton className="h-16 rounded-xl" />
-      </main>
-    );
-  }
 
   return (
     <main className="pb-4">
@@ -293,14 +223,23 @@ export default function OrganizationUsers() {
             onSelectionChange={(k) => setSelectedTab(k as string)}
             className="mb-4"
           >
-            <Tab key="members" title={`Anggota (${members.length})`} />
-            <Tab key="invitations" title={`Undangan (${invitations.length})`} />
+            <Tab key="members" title={`Anggota (${members.data?.length})`} />
+            <Tab
+              key="invitations"
+              title={`Undangan (${invitations.data?.length})`}
+            />
           </Tabs>
         )}
-
         {selectedTab === "members" ? (
           <div className="space-y-2">
-            {members.map((member) => (
+            {members.isLoading && (
+              <div className="space-y-2">
+                <Skeleton className="h-14 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+              </div>
+            )}
+            {members.data?.map((member) => (
               <Card key={member.id} className="shadow-sm">
                 <CardBody className="flex flex-row items-center gap-3 p-3">
                   <Avatar src={member.avatarUrl || undefined} size="sm" />
@@ -346,7 +285,14 @@ export default function OrganizationUsers() {
           </div>
         ) : (
           <div className="space-y-2">
-            {invitations.length === 0 ? (
+            {invitations.isLoading && (
+              <div className="space-y-2">
+                <Skeleton className="h-14 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+                <Skeleton className="h-14 w-full rounded-lg" />
+              </div>
+            )}
+            {invitations.data?.length === 0 ? (
               <Card className="shadow-sm">
                 <CardBody className="text-center py-8">
                   <p className="text-muted-foreground text-sm">
@@ -355,7 +301,7 @@ export default function OrganizationUsers() {
                 </CardBody>
               </Card>
             ) : (
-              invitations.map((invitation) => (
+              invitations.data?.map((invitation) => (
                 <Card key={invitation.id} className="shadow-sm">
                   <CardBody className="flex flex-row items-center gap-3 p-3">
                     <Avatar size="sm" />
@@ -424,7 +370,11 @@ export default function OrganizationUsers() {
             <Button variant="light" onPress={inviteModal.onClose}>
               Batal
             </Button>
-            <Button color="primary" isLoading={inviting} onPress={handleInvite}>
+            <Button
+              color="primary"
+              isLoading={inviteMemberMutation.isPending}
+              onPress={handleInvite}
+            >
               Kirim Undangan
             </Button>
           </ModalFooter>
@@ -465,7 +415,7 @@ export default function OrganizationUsers() {
             </Button>
             <Button
               color="primary"
-              isLoading={updatingRole}
+              isLoading={updateRoleMutation.isPending}
               onPress={handleUpdateRole}
             >
               Simpan
@@ -494,7 +444,7 @@ export default function OrganizationUsers() {
             </Button>
             <Button
               color="danger"
-              isLoading={removing}
+              isLoading={removeMemberMutation.isPending}
               onPress={handleRemoveMember}
             >
               Keluarkan
@@ -522,7 +472,7 @@ export default function OrganizationUsers() {
             </Button>
             <Button
               color="danger"
-              isLoading={cancelingInvite}
+              isLoading={cancelInvitationMutation.isPending}
               onPress={handleCancelInvitation}
             >
               Ya, Batalkan

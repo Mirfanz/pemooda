@@ -13,18 +13,16 @@ import {
 import { SaveIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { OrganizationFull } from "@/types";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar";
+import { useOrganizationDetail } from "@/hooks/queries/organization";
 
 export default function OrganizationSettings() {
   const auth = useAuth();
   const router = useRouter();
-  const [organization, setOrganization] = useState<OrganizationFull | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
+
   const [saving, setSaving] = useState(false);
+  const { data, isLoading, isSuccess } = useOrganizationDetail();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,41 +33,19 @@ export default function OrganizationSettings() {
     facebookUrl: "",
     twitterUrl: "",
   });
-
   useEffect(() => {
-    const fetchOrganization = async () => {
-      try {
-        const res = await axios.get("/api/organization/detail");
-        if (res.data.success) {
-          const org = res.data.data;
-          setOrganization(org);
-          setFormData({
-            name: org.name || "",
-            tagline: org.tagline || "",
-            address: org.details?.address || "",
-            phone: org.details?.phone || "",
-            instagramUrl: org.details?.instagramUrl || "",
-            facebookUrl: org.details?.facebookUrl || "",
-            twitterUrl: org.details?.twitterUrl || "",
-          });
-        }
-      } catch {
-        addToast({
-          title: "Error",
-          description: "Gagal memuat data organisasi",
-          color: "danger",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (auth.user?.organization) {
-      fetchOrganization();
-    } else {
-      router.push("/");
+    if (isSuccess) {
+      setFormData({
+        name: data.name,
+        tagline: data.tagline || "",
+        address: data.address || "",
+        phone: data.phone || "",
+        instagramUrl: data.instagramUrl || "",
+        facebookUrl: data.facebookUrl || "",
+        twitterUrl: data.twitterUrl || "",
+      });
     }
-  }, [auth.user?.organization, router]);
+  }, [isSuccess, data]);
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -95,7 +71,7 @@ export default function OrganizationSettings() {
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <main className="p-4 space-y-4">
         <Skeleton className="h-10 w-32 rounded-lg" />
@@ -105,7 +81,7 @@ export default function OrganizationSettings() {
     );
   }
 
-  if (!organization) {
+  if (!data) {
     return null;
   }
 
@@ -194,7 +170,7 @@ export default function OrganizationSettings() {
           color="primary"
           className="w-full"
           size="lg"
-          startContent={<SaveIcon className="w-5 h-5" />}
+          startContent={!saving && <SaveIcon className="w-5 h-5" />}
           isLoading={saving}
           onPress={handleSubmit}
         >

@@ -16,92 +16,59 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { BuildingIcon, PlusIcon, MailIcon, CheckIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { OrganizationInvitation } from "@/types";
 import Link from "next/link";
+import {
+  useMyInvitations,
+  useAcceptInvitation,
+  useRejectInvitation,
+} from "@/hooks/queries/organization";
 
 export default function NoOrganizationContent() {
   const auth = useAuth();
-  const [invitations, setInvitations] = useState<OrganizationInvitation[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [accepting, setAccepting] = useState<string | null>(null);
-  const [rejecting, setRejecting] = useState(false);
   const [selectedInvitation, setSelectedInvitation] =
     useState<OrganizationInvitation | null>(null);
   const rejectModal = useDisclosure();
 
-  useEffect(() => {
-    const fetchInvitations = async () => {
-      try {
-        const res = await axios.get("/api/organization/invitations/my");
-        if (res.data.success) {
-          setInvitations(res.data.data);
-        }
-      } catch {
-        // Handle error silently
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchInvitations();
-  }, []);
+  const { data: invitations = [], isLoading: loading } = useMyInvitations();
+  const acceptMutation = useAcceptInvitation();
+  const rejectMutation = useRejectInvitation();
 
   const handleAccept = async (invitationId: string) => {
-    setAccepting(invitationId);
-    try {
-      const res = await axios.post("/api/organization/invitations/accept", {
-        invitationId,
-      });
-      if (res.data.success) {
+    await acceptMutation
+      .mutateAsync({ invitationId })
+      .then(() => {
         addToast({
-          title: "Berhasil",
           description: "Anda berhasil bergabung dengan organisasi",
           color: "success",
         });
         auth.refreshUser();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          description: error.response?.data?.message || "Terjadi kesalahan",
+          color: "danger",
+        });
       });
-    } finally {
-      setAccepting(null);
-    }
   };
 
   const handleReject = async () => {
     if (!selectedInvitation) return;
-    setRejecting(true);
-    try {
-      const res = await axios.post("/api/organization/invitations/reject", {
-        invitationId: selectedInvitation.id,
-      });
-      if (res.data.success) {
+    rejectMutation
+      .mutateAsync({ invitationId: selectedInvitation.id })
+      .then(() => {
         addToast({
-          title: "Berhasil",
           description: "Undangan berhasil ditolak",
-          color: "success",
         });
-        setInvitations(
-          invitations.filter((i) => i.id !== selectedInvitation.id)
-        );
         rejectModal.onClose();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          description: error.response?.data?.message || "Terjadi kesalahan",
+          color: "danger",
+        });
       });
-    } finally {
-      setRejecting(false);
-    }
   };
 
   const openRejectModal = (invitation: OrganizationInvitation) => {
@@ -111,7 +78,6 @@ export default function NoOrganizationContent() {
 
   return (
     <main className="p-4">
-      {/* Header */}
       <div className="text-center py-8">
         <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
           <BuildingIcon className="w-10 h-10 text-primary-500" />
@@ -122,7 +88,6 @@ export default function NoOrganizationContent() {
         </p>
       </div>
 
-      {/* Create Organization */}
       <Card className="shadow-lg mb-6">
         <CardBody className="p-4">
           <div className="flex items-center gap-3 mb-3">
@@ -147,7 +112,6 @@ export default function NoOrganizationContent() {
         </CardBody>
       </Card>
 
-      {/* Invitations */}
       <div>
         <div className="flex items-center gap-2 mb-3">
           <MailIcon className="w-4 h-4 text-muted-foreground" />
@@ -208,7 +172,7 @@ export default function NoOrganizationContent() {
                       size="sm"
                       className="flex-1"
                       startContent={<CheckIcon className="w-4 h-4" />}
-                      isLoading={accepting === invitation.id}
+                      isLoading={acceptMutation.isPending}
                       onPress={() => handleAccept(invitation.id)}
                     >
                       Bergabung
@@ -235,7 +199,11 @@ export default function NoOrganizationContent() {
             <Button variant="light" onPress={rejectModal.onClose}>
               Batal
             </Button>
-            <Button color="danger" isLoading={rejecting} onPress={handleReject}>
+            <Button
+              color="danger"
+              isLoading={rejectMutation.isPending}
+              onPress={handleReject}
+            >
               Ya, Tolak
             </Button>
           </ModalFooter>

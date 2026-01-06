@@ -79,7 +79,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    if (hasRole(currentUser.role, "KETUA")) {
+    if (!hasRole(currentUser.role, "KETUA")) {
       return NextResponse.json(
         {
           success: false,
@@ -189,7 +189,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    if (hasRole(currentUser.role, "KETUA")) {
+    if (!hasRole(currentUser.role, "KETUA")) {
       return NextResponse.json(
         {
           success: false,

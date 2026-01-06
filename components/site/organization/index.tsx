@@ -26,12 +26,13 @@ import {
   LogOutIcon,
 } from "lucide-react";
 import { InstagramIcon, TwitterXIcon, WhatsappIcon } from "@/components/icons";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { OrganizationFull } from "@/types";
 import Link from "next/link";
 import NoOrganizationContent from "./no-organization";
 import { Role } from "@/lib/generated/prisma/enums";
+import {
+  useOrganizationDetail,
+  useLeaveOrganization,
+} from "@/hooks/queries/organization";
 
 const roleLabels: Record<string, string> = {
   KETUA: "Ketua",
@@ -44,60 +45,28 @@ const roleLabels: Record<string, string> = {
 
 export default function OrganizationPage() {
   const auth = useAuth();
-  const [organization, setOrganization] = useState<OrganizationFull | null>(
-    null
-  );
-  const [loading, setLoading] = useState(true);
-  const [leaving, setLeaving] = useState(false);
   const leaveModal = useDisclosure();
 
-  useEffect(() => {
-    const fetchOrganization = async () => {
-      try {
-        const res = await axios.get("/api/organization/detail");
-        if (res.data.success) {
-          setOrganization(res.data.data);
-        }
-      } catch {
-        // Handle error silently
-      } finally {
-        setLoading(false);
-      }
-    };
+  const organization = useOrganizationDetail();
+  const leaveOrganizationMutation = useLeaveOrganization();
 
-    if (auth.user?.organization) {
-      fetchOrganization();
-    } else {
-      setLoading(false);
-    }
-  }, [auth.user?.organization]);
-
-  const handleLeave = async () => {
-    setLeaving(true);
-    try {
-      const res = await axios.post("/api/organization/leave");
-      if (res.data.success) {
-        addToast({
-          title: "Berhasil",
-          description: "Anda telah keluar dari organisasi",
-          color: "success",
-        });
+  const handleLeave = () => {
+    leaveOrganizationMutation
+      .mutateAsync()
+      .then((res) => {
+        addToast({ description: "Anda telah keluar dari organisasi" });
         auth.refreshUser();
         leaveModal.onClose();
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      addToast({
-        title: "Gagal",
-        description: err.response?.data?.message || "Terjadi kesalahan",
-        color: "danger",
+      })
+      .catch((error) => {
+        addToast({
+          description: error.response?.data?.message || error.message,
+          color: "danger",
+        });
       });
-    } finally {
-      setLeaving(false);
-    }
   };
 
-  if (loading || auth.isLoading) {
+  if (organization.isLoading || auth.isLoading) {
     return (
       <main className="p-4 space-y-4">
         <Skeleton className="h-40 rounded-2xl" />
@@ -107,13 +76,13 @@ export default function OrganizationPage() {
     );
   }
 
-  if (!auth.user?.organization || !organization) {
+  if (organization.error || !auth.user?.organization || !organization.data) {
     return <NoOrganizationContent />;
   }
 
   return (
     <main className="pb-4">
-      <div className="bg-linear-to-br from-primary-500 to-primary-700 text-white p-4 pb-16 rounded-b-3xl">
+      <div className="bg-linear-to-b from-primary to-primary-500 text-white p-4 pb-16 rounded-b-3xl">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg font-semibold">Organisasi</h1>
           {auth.hasRole(Role.KETUA) && (
@@ -130,13 +99,15 @@ export default function OrganizationPage() {
         </div>
         <div className="text-center">
           <Avatar
-            src={organization.imageUrl || undefined}
+            src={organization.data.imageUrl || undefined}
             className="w-20 h-20 mx-auto mb-3 ring-4 ring-white/30"
             fallback={<BuildingIcon className="w-8 h-8" />}
           />
-          <h2 className="text-xl font-bold">{organization.name}</h2>
-          {organization.tagline && (
-            <p className="text-white/80 text-sm mt-1">{organization.tagline}</p>
+          <h2 className="text-xl font-bold">{organization.data.name}</h2>
+          {organization.data.tagline && (
+            <p className="text-white/80 text-sm mt-1">
+              {organization.data.tagline}
+            </p>
           )}
         </div>
       </div>
@@ -150,7 +121,7 @@ export default function OrganizationPage() {
                 <UsersIcon className="w-5 h-5 text-primary-600" />
               </div>
               <p className="text-2xl font-bold text-primary-600">
-                {organization.summary?.totalMembers || 0}
+                {organization.data.summary?.totalMembers || 0}
               </p>
               <p className="text-xs text-muted-foreground">Anggota</p>
             </CardBody>
@@ -161,7 +132,7 @@ export default function OrganizationPage() {
                 <CalendarIcon className="w-5 h-5 text-success-600" />
               </div>
               <p className="text-2xl font-bold text-success-600">
-                {organization.summary?.totalActivities || 0}
+                {organization.data.summary?.totalActivities || 0}
               </p>
               <p className="text-xs text-muted-foreground">Kegiatan</p>
             </CardBody>
@@ -192,20 +163,20 @@ export default function OrganizationPage() {
         </h3>
         <Card className="shadow-sm">
           <CardBody className="space-y-3">
-            {organization.phone && (
+            {organization.data.phone && (
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-success-100 flex items-center justify-center">
                   <PhoneIcon className="w-4 h-4 text-success-600" />
                 </div>
-                <span className="text-sm">{organization.phone}</span>
+                <span className="text-sm">{organization.data.phone}</span>
               </div>
             )}
-            {organization.address && (
+            {organization.data.address && (
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-warning-100 flex items-center justify-center">
                   <MapPinIcon className="w-4 h-4 text-warning-600" />
                 </div>
-                <span className="text-sm">{organization.address}</span>
+                <span className="text-sm">{organization.data.address}</span>
               </div>
             )}
           </CardBody>
@@ -213,18 +184,18 @@ export default function OrganizationPage() {
       </div>
 
       {/* Social Media */}
-      {(organization.instagramUrl ||
-        organization.twitterUrl ||
-        organization.facebookUrl) && (
+      {(organization.data.instagramUrl ||
+        organization.data.twitterUrl ||
+        organization.data.facebookUrl) && (
         <div className="px-4 mt-4">
           <h3 className="text-sm font-semibold mb-2 text-muted-foreground">
             Media Sosial
           </h3>
           <div className="flex gap-2">
-            {organization.instagramUrl && (
+            {organization.data.instagramUrl && (
               <Button
                 as="a"
-                href={organization.instagramUrl}
+                href={organization.data.instagramUrl}
                 target="_blank"
                 isIconOnly
                 variant="flat"
@@ -233,10 +204,10 @@ export default function OrganizationPage() {
                 <InstagramIcon className="w-5 h-5" />
               </Button>
             )}
-            {organization.twitterUrl && (
+            {organization.data.twitterUrl && (
               <Button
                 as="a"
-                href={organization.twitterUrl}
+                href={organization.data.twitterUrl}
                 target="_blank"
                 isIconOnly
                 variant="flat"
@@ -245,10 +216,10 @@ export default function OrganizationPage() {
                 <TwitterXIcon className="w-5 h-5" />
               </Button>
             )}
-            {organization.facebookUrl && (
+            {organization.data.facebookUrl && (
               <Button
                 as="a"
-                href={organization.facebookUrl}
+                href={organization.data.facebookUrl}
                 target="_blank"
                 isIconOnly
                 variant="flat"
@@ -295,15 +266,19 @@ export default function OrganizationPage() {
           <ModalBody>
             <p className="text-sm">
               Apakah Anda yakin ingin keluar dari{" "}
-              <strong>{organization.name}</strong>? Anda perlu diundang kembali
-              untuk bergabung lagi.
+              <strong>{organization.data.name}</strong>? Anda perlu diundang
+              kembali untuk bergabung lagi.
             </p>
           </ModalBody>
           <ModalFooter>
             <Button variant="light" onPress={leaveModal.onClose}>
               Batal
             </Button>
-            <Button color="danger" isLoading={leaving} onPress={handleLeave}>
+            <Button
+              color="danger"
+              isLoading={leaveOrganizationMutation.isPending}
+              onPress={handleLeave}
+            >
               Keluar
             </Button>
           </ModalFooter>

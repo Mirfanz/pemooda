@@ -226,7 +226,7 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    if (hasRole(currentUser.role, Role.KETUA)) {
+    if (!hasRole(currentUser.role, Role.KETUA)) {
       return NextResponse.json(
         {
           success: false,

@@ -6,7 +6,7 @@ export const getActivityStatus = (
 ): ActivityStatus => {
   const currentDate = new Date();
 
-  if (currentDate < new Date(startDate)) return "upcoming";
-  else if (endDate && currentDate < new Date(endDate)) return "ongoing";
-  return "ended";
+  if (currentDate < new Date(startDate)) return "UPCOMING";
+  else if (endDate && currentDate < new Date(endDate)) return "ONGOING";
+  return "ENDED";
 };

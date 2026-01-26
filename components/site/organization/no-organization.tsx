@@ -25,7 +25,7 @@ import {
   useRejectInvitation,
 } from "@/hooks/queries/organization";
 
-export default function NoOrganizationContent() {
+const NoOrganization = () => {
   const auth = useAuth();
   const [selectedInvitation, setSelectedInvitation] =
     useState<OrganizationInvitation | null>(null);
@@ -211,4 +211,6 @@ export default function NoOrganizationContent() {
       </Modal>
     </main>
   );
-}
+};
+
+export default NoOrganization;

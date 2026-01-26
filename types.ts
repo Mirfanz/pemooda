@@ -1,4 +1,4 @@
-import { Role } from "@/lib/generated/prisma/enums";
+import { ActivityType, Role } from "@/lib/generated/prisma/enums";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -68,14 +68,7 @@ export interface OrganizationInvitation {
   creator: UserMinimal;
 }
 
-export type ActivityStatus = "upcoming" | "ongoing" | "ended";
-export type ActivityType =
-  | "MEETING"
-  | "TRAINING"
-  | "VOLUNTEER"
-  | "GATHERING"
-  | "SEMINAR"
-  | "OTHER";
+export type ActivityStatus = "UPCOMING" | "ONGOING" | "ENDED";
 
 export interface Activity {
   id: string;
@@ -93,3 +86,12 @@ export interface Activity {
   updatedAt: Date | string;
   organization: Organization;
 }
+
+export type Color =
+  | "default"
+  | "primary"
+  | "secondary"
+  | "success"
+  | "warning"
+  | "danger"
+  | undefined;

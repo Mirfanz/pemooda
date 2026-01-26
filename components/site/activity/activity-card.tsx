@@ -1,7 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import type { ActivityStatus, Activity } from "@/types";
+import { activityStatusLabel, activityTypeLabel } from "@/config/enum-label";
+import { ActivityType } from "@/lib/generated/prisma/enums";
+import type { ActivityStatus, Activity, Color } from "@/types";
 import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import {
   CalendarIcon,
@@ -16,42 +17,24 @@ type Props = {
   event: Activity;
 };
 
+const typeColor: Record<ActivityType, Color> = {
+  VOLUNTEER: "default",
+  TRAINING: "danger",
+  MEETING: "secondary",
+  GATHERING: "success",
+  SEMINAR: "warning",
+  OTHER: "default",
+};
+const statusColor: Record<ActivityStatus, Color> = {
+  UPCOMING: "warning",
+  ONGOING: "success",
+  ENDED: "default",
+};
+
 const ActivityCard = ({ event }: Props) => {
-  const getStatusColor = (status: ActivityStatus) => {
-    switch (status) {
-      case "upcoming":
-        return "primary";
-      case "ongoing":
-        return "success";
-      case "ended":
-        return "default";
-    }
-  };
-
-  const getStatusLabel = (status: ActivityStatus) => {
-    switch (status) {
-      case "upcoming":
-        return "Akan Datang";
-      case "ongoing":
-        return "Berlangsung";
-      case "ended":
-        return "Selesai";
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      Sosial: "bg-pink-50 text-pink-600",
-      Pelatihan: "bg-purple-50 text-purple-600",
-      Rapat: "bg-blue-50 text-blue-600",
-      Olahraga: "bg-green-50 text-green-600",
-      Seminar: "bg-orange-50 text-orange-600",
-    };
-    return colors[category] || "bg-gray-50 text-gray-600";
-  };
   return (
     <Card
-      className="shadow-sm hover:shadow-md transition-shadow"
+      className="shadow-sm hover:shadow-md transition-all"
       isPressable
       fullWidth
       //   onPress={() => router.push(`/event/${event.id}`)}
@@ -64,15 +47,15 @@ const ActivityCard = ({ event }: Props) => {
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <Chip size="sm" className={cn(getCategoryColor(event.type))}>
-                  {event.type}
+                <Chip size="sm" color={typeColor[event.type]} variant="flat">
+                  {activityTypeLabel[event.type]}
                 </Chip>
                 <Chip
                   size="sm"
-                  color={getStatusColor(event.status)}
+                  color={statusColor[event.status]}
                   variant="flat"
                 >
-                  {getStatusLabel(event.status)}
+                  {activityStatusLabel[event.status]}
                 </Chip>{" "}
                 {event.isPublic && (
                   <Chip
@@ -126,7 +109,7 @@ const ActivityCard = ({ event }: Props) => {
               }}
             />
 
-            {event.status === "upcoming" && (
+            {event.status === "UPCOMING" && (
               <Button
                 size="sm"
                 className="hidden"

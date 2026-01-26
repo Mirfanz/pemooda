@@ -49,7 +49,7 @@ const Login = () => {
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         setErrors(
-          err.response.data.errors || { general: [err.response.data.message] }
+          err.response.data.errors || { general: [err.response.data.message] },
         );
       } else {
         setErrors({ general: ["Terjadi kesalahan"] });

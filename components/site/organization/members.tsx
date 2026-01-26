@@ -34,21 +34,10 @@ import {
   useRemoveMember,
   useCancelInvitation,
 } from "@/hooks/queries/organization";
-import { OrganizationInvitation, OrganizationUser } from "@/types";
+import { Color, OrganizationInvitation, OrganizationUser } from "@/types";
+import { roleLabel } from "@/config/enum-label";
 
-const roleLabels: Record<string, string> = {
-  KETUA: "Ketua",
-  SEKRETARIS: "Sekretaris",
-  BENDAHARA: "Bendahara",
-  ANGGOTA: "Anggota",
-  SENIOR: "Senior",
-  PEMBINA: "Pembina",
-};
-
-const roleColors: Record<
-  string,
-  "primary" | "secondary" | "success" | "warning" | "danger" | "default"
-> = {
+const roleColors: Record<Role, Color> = {
   KETUA: "primary",
   SEKRETARIS: "secondary",
   BENDAHARA: "success",
@@ -57,7 +46,7 @@ const roleColors: Record<
   PEMBINA: "default",
 };
 
-export default function OrganizationUsers() {
+const OrganizationUsers = () => {
   const auth = useAuth();
   const router = useRouter();
   const [selectedTab, setSelectedTab] = useState("members");
@@ -256,7 +245,7 @@ export default function OrganizationUsers() {
                     color={roleColors[member.role || "ANGGOTA"]}
                     variant="flat"
                   >
-                    {roleLabels[member.role || "ANGGOTA"]}
+                    {roleLabel[member.role || "ANGGOTA"]}
                   </Chip>
                   {isKetua && member.id !== auth.user?.id && (
                     <div className="flex gap-1">
@@ -321,7 +310,7 @@ export default function OrganizationUsers() {
                       color={roleColors[invitation.role]}
                       variant="flat"
                     >
-                      {roleLabels[invitation.role]}
+                      {roleLabel[invitation.role]}
                     </Chip>
                     <Button
                       isIconOnly
@@ -482,4 +471,6 @@ export default function OrganizationUsers() {
       </Modal>
     </main>
   );
-}
+};
+
+export default OrganizationUsers;

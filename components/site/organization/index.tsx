@@ -23,9 +23,16 @@ import {
   SettingsIcon,
   UsersIcon,
   CalendarIcon,
-  LogOutIcon,
+  QrCodeIcon,
 } from "lucide-react";
-import { InstagramIcon, TwitterXIcon, WhatsappIcon } from "@/components/icons";
+import {
+  CalendarBoldIcon,
+  InstagramIcon,
+  TwitterXIcon,
+  UsersBoldIcon,
+  WalletBoldIcon,
+  WhatsappIcon,
+} from "@/components/icons";
 import Link from "next/link";
 import NoOrganizationContent from "./no-organization";
 import { Role } from "@/lib/generated/prisma/enums";
@@ -33,17 +40,33 @@ import {
   useOrganizationDetail,
   useLeaveOrganization,
 } from "@/hooks/queries/organization";
+import { roleLabel } from "@/config/enum-label";
+import { cn } from "@/lib/utils";
 
-const roleLabels: Record<string, string> = {
-  KETUA: "Ketua",
-  SEKRETARIS: "Sekretaris",
-  BENDAHARA: "Bendahara",
-  ANGGOTA: "Anggota",
-  SENIOR: "Senior",
-  PEMBINA: "Pembina",
-};
+const fastMenuItems = [
+  {
+    label: "Absen",
+    icon: QrCodeIcon,
+    href: "/absen",
+  },
+  {
+    label: "Anggota",
+    icon: UsersBoldIcon,
+    href: "/organization/members",
+  },
+  {
+    label: "Kegiatan",
+    icon: CalendarBoldIcon,
+    href: "/activity",
+  },
+  {
+    label: "Keuangan",
+    icon: WalletBoldIcon,
+    href: "/finance",
+  },
+];
 
-export default function OrganizationPage() {
+const Organization = () => {
   const auth = useAuth();
   const leaveModal = useDisclosure();
 
@@ -80,12 +103,14 @@ export default function OrganizationPage() {
     return <NoOrganizationContent />;
   }
 
+  const isKetua = auth.hasRole(Role.KETUA);
+
   return (
     <main className="pb-4">
-      <div className="bg-linear-to-b from-primary to-primary-500 text-white p-4 pb-16 rounded-b-3xl">
+      <div className="bg-linear-to-b from-primary to-primary-800 text-white p-4 pb-16 rounded-b-3xl">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-lg font-semibold">Organisasi</h1>
-          {auth.hasRole(Role.KETUA) && (
+          {isKetua && (
             <Button
               as={Link}
               href="/organization/settings"
@@ -150,10 +175,37 @@ export default function OrganizationPage() {
               <p className="text-xs text-muted-foreground">Anda</p>
             </div>
             <Chip size="sm" color="primary" variant="flat">
-              {roleLabels[auth.user.role || "ANGGOTA"]}
+              {roleLabel[auth.user.role || "ANGGOTA"]}
             </Chip>
           </CardBody>
         </Card>
+      </div>
+
+      {/* Menu Cepat */}
+      <div className="px-4 mt-4">
+        <h3 className="text-sm font-semibold mb-2 text-muted-foreground">
+          Menu Cepat
+        </h3>
+        <div className="grid gap-2.5 grid-cols-4">
+          {fastMenuItems.map((item) => {
+            return (
+              <Button
+                key={item.label}
+                as={Link}
+                href={item.href}
+                variant="bordered"
+                color="primary"
+                className={cn(
+                  "flex-col shadow-lg gap-1 border-1 aspect-square min-w-0 size-auto",
+                  "shadow-teal-600/10 bg-teal-600/5 border-teal-600 text-teal-600",
+                )}
+                startContent={<item.icon className="size-7" />}
+              >
+                <small className="text-xs font-medium">{item.label}</small>
+              </Button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Contact Info */}
@@ -232,34 +284,6 @@ export default function OrganizationPage() {
         </div>
       )}
 
-      {/* Quick Actions */}
-      <div className="px-4 mt-4">
-        <h3 className="text-sm font-semibold mb-2 text-muted-foreground">
-          Menu
-        </h3>
-        <div className="space-y-2">
-          <Button
-            as={Link}
-            href="/organization/members"
-            variant="flat"
-            className="w-full justify-start h-12"
-            startContent={<UsersIcon className="w-5 h-5" />}
-          >
-            Kelola Anggota
-          </Button>
-          <Button
-            variant="flat"
-            color="danger"
-            className="w-full justify-start h-12"
-            startContent={<LogOutIcon className="w-5 h-5" />}
-            onPress={leaveModal.onOpen}
-            isDisabled={auth.hasRole(Role.KETUA)}
-          >
-            Keluar dari Organisasi
-          </Button>
-        </div>
-      </div>
-
       <Modal isOpen={leaveModal.isOpen} onClose={leaveModal.onClose}>
         <ModalContent>
           <ModalHeader>Keluar dari Organisasi</ModalHeader>
@@ -286,4 +310,6 @@ export default function OrganizationPage() {
       </Modal>
     </main>
   );
-}
+};
+
+export default Organization;

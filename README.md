@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pemooda App
 
-## Getting Started
+Aplikasi berbasis web PWA untuk memudahkan mengelola organisasi karang taruna atau remaja masjid. Aplikasi ini diharapkan bisa bermanfaat untuk masyarakat di seluruh wilayah Indonesia.
 
-First, run the development server:
+## Fitur Utama
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Manajemen Anggota**
+  - Mengelola anggota karang taruna
+  - Akses sesuai `posisi` atau `role` - _Ketua_, _Bendahara_, _Sekretaris_, _Pembina_, _Anggota_
+- **Manajemen Keuangan**
+  - Mengelola `pemasukan` dan `pengeluaran` organisasi
+  - Membuat tagihan `iuran`, `kas`, `denda`
+- **Manajemen Event / Kegiatan**
+  - Membuat schedule acara
+  - Absensi kehadiran dengan scan `QR-CODE` atau `scan wajah`
+- **Announcement**
+  - Membuat pengumuman
+  - Membuat pengingat
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Cara Akses Aplikasi
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Saat ini aplikasi `PEMOODA` belum tersedia di `Play Store`. Untuk mengakses aplikasi `PEMOODA` silahkan kunjungi website ***https://pemooda.vercel.app***.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Apakah bisa di install ?
 
-## Learn More
+Tentu Bisa, aplikasi ini sudah berbasis `PWA` (Progressive Web Aplication) jadi sudah seperti aplikasi native. Ikuti langkah-langkah ini:
 
-To learn more about Next.js, take a look at the following resources:
+1. Buka website [Pemooda](https://pemooda.vercel.app) di aplikasi browser `chrome` atau semacamnya
+2. Klik menu, biasanya titik tiga di pojok kanan atas.
+3. Klik tambahkan ke layar utama lalu pilih install
+4. Tunggu aplikasi terinstall lalu aplikasi akan ada di hp kamu
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+</br>
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+`catatan:` </br>
+_Tidak semua browser support install PWA, disarankan menggunakan `Chrome` atau `Safari`._
 
-## Deploy on Vercel
+## Jaminan & Keamanan
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tidak perlu khawatir soal keamanan data anda. Ini hanya aplikasi berbasis web yang berjalan diatas aplikasi browser seperti `Chrome` atau lainnya. Akses ke perangkat anda sangat terbatas karena dibatasi oleh aplikasi browser.

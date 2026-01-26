@@ -21,13 +21,13 @@ const Navbar = ({
   const router = useRouter();
   return (
     <nav className={cn("sticky top-0 z-50", className)} {...props}>
-      <div className="flex items-center bg-white shadow-sm  px-4 py-3 rousnded-b-2xl text-foreground gap-2.5">
+      <div className="flex items-center bg-primary shadow-sm  px-4 py-3 rousnded-b-2xl text-primary-foreground gap-2.5">
         <Button
           isIconOnly
           size="sm"
           variant="light"
           onPress={() => router.back()}
-          className="text-foreground"
+          className="text-inherit"
         >
           <ArrowLeftIcon className="size-5" />
         </Button>

@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../navbar";
 import { useOrganizationDetail } from "@/hooks/queries/organization";
 
-export default function OrganizationSettings() {
+const OrganizationSettings = () => {
   const auth = useAuth();
   const router = useRouter();
 
@@ -179,4 +179,6 @@ export default function OrganizationSettings() {
       </div>
     </main>
   );
-}
+};
+
+export default OrganizationSettings;

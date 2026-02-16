@@ -1,34 +1,22 @@
 "use client";
 
-import { activityStatusLabel, activityTypeLabel } from "@/config/enum-label";
-import { ActivityType } from "@/lib/generated/prisma/enums";
-import type { ActivityStatus, Activity, Color } from "@/types";
-import { Button, Card, CardBody, Chip, User } from "@heroui/react";
 import {
   CalendarIcon,
+  MapPoinWaveIcon,
+} from "@/components/icons";
+import { activityStatusEnum, activityTypeEnum } from "@/config/enums";
+import type { Activity } from "@/types";
+import { Button, Card, CardBody, Chip, Divider, User } from "@heroui/react";
+import {
   CheckCircle2Icon,
   ClockIcon,
-  MapPinIcon,
   PlusIcon,
 } from "lucide-react";
 import React from "react";
+import dayjs from "dayjs";
 
 type Props = {
   event: Activity;
-};
-
-const typeColor: Record<ActivityType, Color> = {
-  VOLUNTEER: "default",
-  TRAINING: "danger",
-  MEETING: "secondary",
-  GATHERING: "success",
-  SEMINAR: "warning",
-  OTHER: "default",
-};
-const statusColor: Record<ActivityStatus, Color> = {
-  UPCOMING: "warning",
-  ONGOING: "success",
-  ENDED: "default",
 };
 
 const ActivityCard = ({ event }: Props) => {
@@ -47,16 +35,16 @@ const ActivityCard = ({ event }: Props) => {
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <Chip size="sm" color={typeColor[event.type]} variant="flat">
-                  {activityTypeLabel[event.type]}
-                </Chip>
                 <Chip
                   size="sm"
-                  color={statusColor[event.status]}
+                  color={activityStatusEnum[event.status].color}
                   variant="flat"
                 >
-                  {activityStatusLabel[event.status]}
-                </Chip>{" "}
+                  {activityStatusEnum[event.status].label}
+                </Chip>
+                <Chip size="sm" variant="flat">
+                  {activityTypeEnum[event.type].label}
+                </Chip>
                 {event.isPublic && (
                   <Chip
                     size="sm"
@@ -75,20 +63,25 @@ const ActivityCard = ({ event }: Props) => {
             </div>
           </div>
 
-          <div className="space-y-2 mb-3">
+          <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <CalendarIcon className="size-4 text-primary" />
-              <span className="text-muted-foreground">{"01 Jan 2026"}</span>
+              <span className="text-muted-foreground">
+                {dayjs(event.startDate).format("DD MMM YYYY")}
+              </span>
               <ClockIcon className="size-4 text-primary ml-2" />
-              <span className="text-muted-foreground">{"00:00 - Selesai"}</span>
+              <span className="text-muted-foreground">
+                {dayjs(event.startDate).format("HH:mm")}
+              </span>
+              {/* <span className="text-muted-foreground">{"00:00 - Selesai"}</span> */}
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <MapPinIcon className="size-4 text-primary" />
+              <MapPoinWaveIcon className="size-4 text-primary" />
               <span className="text-muted-foreground">{event.location}</span>
             </div>
           </div>
-
-          <div className="flex items-center justify-between pt-3 border-t">
+          <Divider className="my-3" />
+          <div className="flex items-center justify-between">
             {/* <div className="flex items-center gap-2">
               <Avatar
                 src="https://i.pravatar.cc/150?u=a042581f4e29026024d"

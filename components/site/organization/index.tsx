@@ -40,7 +40,7 @@ import {
   useOrganizationDetail,
   useLeaveOrganization,
 } from "@/hooks/queries/organization";
-import { roleLabel } from "@/config/enum-label";
+import { roleEnum } from "@/config/enums";
 import { cn } from "@/lib/utils";
 
 const fastMenuItems = [
@@ -175,7 +175,7 @@ const Organization = () => {
               <p className="text-xs text-muted-foreground">Anda</p>
             </div>
             <Chip size="sm" color="primary" variant="flat">
-              {roleLabel[auth.user.role || "ANGGOTA"]}
+              {roleEnum[auth.user.role || "ANGGOTA"].label}
             </Chip>
           </CardBody>
         </Card>

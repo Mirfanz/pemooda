@@ -1,8 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Button, Card, CardBody, Tabs, Tab, Input } from "@heroui/react";
-import { CalendarIcon, PlusIcon, FilterIcon } from "lucide-react";
+import { Button, Card, CardBody, Input } from "@heroui/react";
+import {
+  CalendarIcon,
+  PlusIcon,
+  Settings2Icon,
+} from "lucide-react";
 import EventCard from "./activity-card";
 import { Activity, ActivityStatus } from "@/types";
 import { SearchIcon } from "@/components/icons";
@@ -34,8 +38,8 @@ const ActivityMain = () => {
 
   return (
     <main className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-linear-to-br from-primary to-primary-600 p-4 rounded-b-3xl">
-        <div className="flex items-center justify-between mb-4">
+      <div className=" bg-primary p-4 pb-0">
+        <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl text-white font-bold mb-1">
               Event & Kegiatan
@@ -44,15 +48,17 @@ const ActivityMain = () => {
               {upcomingCount} event mendatang
             </p>
           </div>
-          <Button
+          {/* <Button
             isIconOnly
             variant="flat"
             className="bg-white/20 text-white"
             size="lg"
           >
             <FilterIcon className="size-5" />
-          </Button>
+          </Button> */}
         </div>
+      </div>
+      <div className="flex p-4 rounded-b-3xl sticky top-0 z-50 gap-2 bg-primary">
         <Input
           type="search"
           startContent={<SearchIcon className="size-4 me-1" />}
@@ -61,9 +67,12 @@ const ActivityMain = () => {
           onChange={(e) => setSearch(e.target.value)}
           fullWidth
         />
+        <Button className=" bg-white" isIconOnly>
+          <Settings2Icon className="size-5" />
+        </Button>
       </div>
 
-      <div className="py-2 px-4 bg-background sticky top-0 z-50">
+      {/* <div className="py-2 px-4 bg-background sticky top-0 z-50">
         <div className="overflow-x-auto scrollbar-hide">
           <Tabs
             selectedKey={selectedStatus}
@@ -83,8 +92,8 @@ const ActivityMain = () => {
             <Tab key="ended" title="Selesai" />
           </Tabs>
         </div>
-      </div>
-      <div className="px-4 space-y-3">
+      </div> */}
+      <div className="px-4 space-y-3 mt-4">
         {isLoading ? (
           <Card className="shadow-sm">
             <CardBody className="text-center py-12">

@@ -34,17 +34,8 @@ import {
   useRemoveMember,
   useCancelInvitation,
 } from "@/hooks/queries/organization";
-import { Color, OrganizationInvitation, OrganizationUser } from "@/types";
-import { roleLabel } from "@/config/enum-label";
-
-const roleColors: Record<Role, Color> = {
-  KETUA: "primary",
-  SEKRETARIS: "secondary",
-  BENDAHARA: "success",
-  ANGGOTA: "default",
-  SENIOR: "default",
-  PEMBINA: "default",
-};
+import { OrganizationInvitation, OrganizationUser } from "@/types";
+import { roleEnum } from "@/config/enums";
 
 const OrganizationUsers = () => {
   const auth = useAuth();
@@ -60,7 +51,7 @@ const OrganizationUsers = () => {
   const [inviteRole, setInviteRole] = useState<Role>("ANGGOTA");
 
   const [selectedMember, setSelectedMember] = useState<OrganizationUser | null>(
-    null
+    null,
   );
   const [selectedInvitation, setSelectedInvitation] =
     useState<OrganizationInvitation | null>(null);
@@ -242,10 +233,10 @@ const OrganizationUsers = () => {
                   </div>
                   <Chip
                     size="sm"
-                    color={roleColors[member.role || "ANGGOTA"]}
+                    color={roleEnum[member.role || "ANGGOTA"].color}
                     variant="flat"
                   >
-                    {roleLabel[member.role || "ANGGOTA"]}
+                    {roleEnum[member.role || "ANGGOTA"].label}
                   </Chip>
                   {isKetua && member.id !== auth.user?.id && (
                     <div className="flex gap-1">
@@ -301,16 +292,16 @@ const OrganizationUsers = () => {
                       <p className="text-xs text-muted-foreground">
                         Kadaluarsa:{" "}
                         {new Date(invitation.expiresAt).toLocaleDateString(
-                          "id-ID"
+                          "id-ID",
                         )}
                       </p>
                     </div>
                     <Chip
                       size="sm"
-                      color={roleColors[invitation.role]}
+                      color={roleEnum[invitation.role].color}
                       variant="flat"
                     >
-                      {roleLabel[invitation.role]}
+                      {roleEnum[invitation.role].label}
                     </Chip>
                     <Button
                       isIconOnly

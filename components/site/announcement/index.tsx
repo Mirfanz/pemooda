@@ -108,8 +108,8 @@ const AnnouncementMain = () => {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm rounded-b-3xl p-4 pb-6">
+    <main className="min-h-screen">
+      <div className="bg-primary text-primary-foreground shadow-sm rounded-b-3xl p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-2xl font-bold">Notifikasi</h1>
@@ -120,8 +120,8 @@ const AnnouncementMain = () => {
           {unreadCount > 0 && (
             <Button
               size="sm"
-              variant="flat"
-              color="primary"
+              // variant="flat"
+              color="secondary"
               onPress={markAllAsRead}
               startContent={<CheckCheckIcon className="size-4" />}
             >
@@ -133,8 +133,9 @@ const AnnouncementMain = () => {
         <Tabs
           selectedKey={selectedType}
           onSelectionChange={(key) => setSelectedType(key as NotificationType)}
-          variant="underlined"
-          color="primary"
+          // variant="underlined"
+          color="default"
+          variant="light"
         >
           <Tab key="all" title="Semua" />
           <Tab key="announcement" title="Pengumuman" />
@@ -166,7 +167,7 @@ const AnnouncementMain = () => {
                 <div className="flex gap-3">
                   <div
                     className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconColor(
-                      notif.type
+                      notif.type,
                     )}`}
                   >
                     {getIcon(notif.type)}

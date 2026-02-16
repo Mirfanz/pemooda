@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Button,
@@ -23,15 +23,9 @@ import {
   LinkIcon,
   Globe2Icon,
   LockKeyholeIcon,
-  EllipsisIcon,
   LayersIcon,
   PlusIcon,
   InfoIcon,
-  BookTextIcon,
-  HeartPulseIcon,
-  MegaphoneIcon,
-  HandCoinsIcon,
-  Users2Icon,
 } from "lucide-react";
 import { ActivityType } from "@/lib/generated/prisma/enums";
 import { useCreateActivity } from "@/hooks/queries/activity";
@@ -43,54 +37,9 @@ import {
   TrashIcon,
 } from "@/components/icons";
 import { formatErrors } from "@/lib/utils";
-import { IconSvgProps } from "@/types";
 import clsx from "clsx";
-import { activityTypeLabel } from "@/config/enum-label";
+import { activityTypeEnum } from "@/config/enums";
 import axios from "axios";
-
-const activityTypeOptions: {
-  key: ActivityType;
-  label: string;
-  icon: FC<IconSvgProps>;
-  color: string;
-}[] = [
-  {
-    key: ActivityType.MEETING,
-    label: activityTypeLabel[ActivityType.MEETING],
-    icon: Users2Icon,
-    color: "violet",
-  },
-  {
-    key: ActivityType.TRAINING,
-    label: activityTypeLabel[ActivityType.TRAINING],
-    icon: BookTextIcon,
-    color: "orange",
-  },
-  {
-    key: ActivityType.VOLUNTEER,
-    label: activityTypeLabel[ActivityType.VOLUNTEER],
-    icon: HandCoinsIcon,
-    color: "cyan",
-  },
-  {
-    key: ActivityType.GATHERING,
-    label: activityTypeLabel[ActivityType.GATHERING],
-    icon: HeartPulseIcon,
-    color: "yellow",
-  },
-  {
-    key: ActivityType.SEMINAR,
-    label: activityTypeLabel[ActivityType.SEMINAR],
-    icon: MegaphoneIcon,
-    color: "teal",
-  },
-  {
-    key: ActivityType.OTHER,
-    label: activityTypeLabel[ActivityType.OTHER],
-    icon: EllipsisIcon,
-    color: "default",
-  },
-];
 
 const NewActivity = () => {
   const router = useRouter();
@@ -266,7 +215,13 @@ const NewActivity = () => {
               </h3>
               <Divider />
               <Select
-                items={activityTypeOptions}
+                items={Object.entries(activityTypeEnum).map(
+                  ([type, value]) => ({
+                    type: type as ActivityType,
+                    label: value.label,
+                    icon: value.icon,
+                  }),
+                )}
                 variant="flat"
                 label="Activity Type"
                 labelPlacement="outside-left"
@@ -292,10 +247,7 @@ const NewActivity = () => {
                     item.data ? (
                       <div
                         key={item.key}
-                        className={clsx(
-                          "flex items-center gap-2",
-                          `text-${item.data.color}-600`,
-                        )}
+                        className={clsx("flex items-center gap-2")}
                       >
                         <item.data.icon className="size-4 text-current" />
                         <p className="text-sm grow">{item.data?.label}</p>
@@ -306,7 +258,7 @@ const NewActivity = () => {
               >
                 {(item) => (
                   <SelectItem
-                    key={item.key}
+                    key={item.type}
                     startContent={<item.icon className="size-4" />}
                     hideSelectedIcon
                   >

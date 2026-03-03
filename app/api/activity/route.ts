@@ -100,7 +100,6 @@ export async function GET(req: NextRequest) {
       updatedAt: activity.updatedAt,
     };
   });
-
   return NextResponse.json(
     {
       message: "Success get activities",

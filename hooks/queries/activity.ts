@@ -1,6 +1,12 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import axios from "axios";
 import { ActivityType } from "@/lib/generated/prisma/enums";
+import { Activity } from "@/types";
 
 export const activityKeys = {
   all: ["activities"] as const,
@@ -29,19 +35,32 @@ interface GetActivitiesParams {
 }
 
 export function useActivities(params: GetActivitiesParams = {}) {
-  return useQuery({
+  return useInfiniteQuery({
     queryKey: activityKeys.list(JSON.stringify(params)),
-    queryFn: async () => {
+    queryFn: async ({ pageParam }) => {
       const searchParams = new URLSearchParams();
-      if (params.page) searchParams.set("page", params.page.toString());
+      searchParams.set("page", pageParam.toString());
       if (params.public !== undefined)
         searchParams.set("public", params.public.toString());
       if (params.search) searchParams.set("search", params.search);
 
       const response = await axios.get(
-        `/api/activity?${searchParams.toString()}`
+        `/api/activity?${searchParams.toString()}`,
       );
       return response.data;
+    },
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.meta.isLastPage ? undefined : lastPage.meta.page + 1,
+  });
+}
+
+export function useActivity(id: string) {
+  return useQuery({
+    queryKey: activityKeys.detail(id),
+    queryFn: async () => {
+      const response = await axios.get(`/api/activity/${id}`);
+      return response.data.data as Activity;
     },
   });
 }

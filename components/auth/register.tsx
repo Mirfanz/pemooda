@@ -5,15 +5,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Button, Checkbox, Form, Input } from "@heroui/react";
-import {
-  EyeIcon,
-  MailIcon,
-  LockIcon,
-  UserIcon,
-  LockKeyholeIcon,
-  EyeClosedIcon,
-} from "lucide-react";
 import Image from "next/image";
+import { Eye, EyeClosed, Letter, LockPassword, User } from "@solar-icons/react";
+
 const Register = () => {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -94,7 +88,9 @@ const Register = () => {
           label="Full Name"
           placeholder="What's your name?"
           labelPlacement="outside-top"
-          startContent={<UserIcon className="size-4 text-muted mr-1" />}
+          startContent={
+            <User weight="Broken" className="size-4 text-muted mr-1" />
+          }
         />
 
         <Input
@@ -109,7 +105,9 @@ const Register = () => {
           label="Email Address"
           placeholder="example@email.com"
           labelPlacement="outside-top"
-          startContent={<MailIcon className="size-4 text-muted mr-1" />}
+          startContent={
+            <Letter weight="Broken" className="size-4 text-muted mr-1" />
+          }
         />
         <Input
           name="password"
@@ -129,7 +127,9 @@ const Register = () => {
           label="Password"
           labelPlacement="outside-top"
           placeholder="••••••••"
-          startContent={<LockIcon className="size-4 text-muted mr-1" />}
+          startContent={
+            <LockPassword weight="Broken" className="size-4 text-muted mr-1" />
+          }
           endContent={
             <Button
               isIconOnly
@@ -139,9 +139,9 @@ const Register = () => {
               onPress={() => setShowPassword((prev) => !prev)}
             >
               {showPassword ? (
-                <EyeIcon className="size-4" />
+                <Eye weight="Broken" className="size-4" />
               ) : (
-                <EyeClosedIcon className="size-4" />
+                <EyeClosed weight="Broken" className="size-4" />
               )}
             </Button>
           }
@@ -160,7 +160,9 @@ const Register = () => {
           label="Confirm Password"
           labelPlacement="outside-top"
           placeholder="••••••••"
-          startContent={<LockKeyholeIcon className="size-4 text-muted mr-1" />}
+          startContent={
+            <LockPassword weight="Broken" className="size-4 text-muted mr-1" />
+          }
           endContent={
             <Button
               isIconOnly
@@ -170,9 +172,9 @@ const Register = () => {
               onPress={() => setShowConfirmPassword((prev) => !prev)}
             >
               {showConfirmPassword ? (
-                <EyeIcon className="size-4" />
+                <Eye weight="Broken" className="size-4" />
               ) : (
-                <EyeClosedIcon className="size-4" />
+                <EyeClosed weight="Broken" className="size-4" />
               )}
             </Button>
           }

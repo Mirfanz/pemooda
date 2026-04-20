@@ -1,6 +1,6 @@
 "use client";
 
-import { useActivity } from "@/hooks/queries/activity";
+import { useActivity, useDeleteActivity } from "@/hooks/queries/activity";
 import Navbar from "../navbar";
 import {
   Card,
@@ -12,33 +12,37 @@ import {
   Progress,
   Avatar,
   Button,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@heroui/react";
-import {
-  activityTypeEnum,
-  activityStatusEnum,
-  attendeeStatusEnum,
-} from "@/config/enums";
-import {
-  CheckCircle2Icon,
-  XCircleIcon,
-  AlertCircleIcon,
-  MinusCircleIcon,
-  EllipsisVerticalIcon,
-  TextSelectIcon,
-  EditIcon,
-  ArrowUpRightFromSquareIcon,
-} from "lucide-react";
+import { activityTypeEnum, attendeeStatusEnum } from "@/config/enums";
 import * as fns from "date-fns";
 import { id } from "date-fns/locale";
 import {
-  WalletIcon,
-  UsersIcon,
-  CalendarIcon,
-  MapPoinWaveIcon,
-} from "@/components/icons";
+  Share,
+  PenNewSquare,
+  TrashBinTrash,
+  CheckCircle,
+  CloseCircle,
+  MinusCircle,
+  DangerCircle,
+  MenuDots,
+  CalendarMark,
+  MapPointWave,
+  SquareTopDown,
+  DocumentAdd,
+  UsersGroupRounded,
+  Wallet,
+} from "@solar-icons/react";
 import Link from "next/link";
 import { displayIntervalDate } from "@/lib/utils";
 import Countdown from "./countdown";
+import { useAuth } from "@/contexts/auth-context";
+import { Role } from "@/lib/generated/prisma/enums";
+import Swal from "sweetalert2";
+import { useRouter } from "next/navigation";
 
 type Props = {
   activityId: string;
@@ -116,18 +120,23 @@ const dummyBudget = {
 const getStatusIcon = (status: string) => {
   switch (status) {
     case "PRESENT":
-      return <CheckCircle2Icon className="w-4 h-4 text-success" />;
+      return <CheckCircle weight="Broken" className="w-4 h-4 text-success" />;
     case "ABSENT":
-      return <XCircleIcon className="w-4 h-4 text-danger" />;
+      return <CloseCircle weight="Broken" className="w-4 h-4 text-danger" />;
     case "EXCUSE":
-      return <AlertCircleIcon className="w-4 h-4 text-warning" />;
+      return <DangerCircle weight="Broken" className="w-4 h-4 text-warning" />;
     default:
-      return <MinusCircleIcon className="w-4 h-4 text-default-400" />;
+      return (
+        <MinusCircle weight="Broken" className="w-4 h-4 text-default-400" />
+      );
   }
 };
 
 const Detail = ({ activityId }: Props) => {
   const { isLoading, data: activity } = useActivity(activityId);
+  const auth = useAuth();
+  const router = useRouter();
+  const deleteActivity = useDeleteActivity();
 
   const totalExpenses = dummyBudget.expenses.reduce(
     (sum, exp) => sum + exp.amount,
@@ -142,6 +151,69 @@ const Detail = ({ activityId }: Props) => {
     excuse: dummyAttendance.filter((a) => a.status === "EXCUSE").length,
     pending: dummyAttendance.filter((a) => a.status === "PENDING").length,
     total: dummyAttendance.length,
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: activity?.title || "Kegiatan",
+      text: `${activity?.title}\n${activity?.description || ""}\n\nLokasi: ${activity?.location}\nTanggal: ${fns.format(new Date(activity?.startDate || ""), "dd MMMM yyyy, HH:mm", { locale: id })} WIB`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share && navigator.canShare(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(
+          `${shareData.title}\n\n${shareData.text}\n\n${shareData.url}`,
+        );
+        Swal.fire({
+          icon: "success",
+          title: "Link Disalin!",
+          text: "Link kegiatan telah disalin ke clipboard",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Error sharing:", error);
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "Hapus Kegiatan?",
+      text: "Kegiatan yang dihapus tidak dapat dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteActivity.mutateAsync(activityId);
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus!",
+          text: "Kegiatan berhasil dihapus",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        router.push("/activity");
+      } catch (error) {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: "Terjadi kesalahan saat menghapus kegiatan",
+        });
+      }
+    }
   };
 
   if (isLoading) {
@@ -179,9 +251,50 @@ const Detail = ({ activityId }: Props) => {
       <Navbar
         title="Detail Kegiatan"
         endContent={
-          <Button size="sm" isIconOnly variant="light" className="text-inherit">
-            <EllipsisVerticalIcon className="size-5" />
-          </Button>
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Button
+                size="sm"
+                isIconOnly
+                variant="light"
+                className="text-inherit"
+              >
+                <MenuDots weight="Bold" className="size-5" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu variant="flat">
+              <DropdownItem
+                key="share"
+                startContent={<Share weight="Linear" className="size-4" />}
+                onPress={handleShare}
+              >
+                Share
+              </DropdownItem>
+              {auth.hasRole([Role.KETUA, Role.SEKRETARIS]) ? (
+                <>
+                  <DropdownItem
+                    key="edit"
+                    startContent={
+                      <PenNewSquare weight="Broken" className="size-4" />
+                    }
+                  >
+                    Edit
+                  </DropdownItem>
+                  <DropdownItem
+                    key="delete"
+                    startContent={
+                      <TrashBinTrash weight="Broken" className="size-4" />
+                    }
+                    className="text-danger"
+                    color="danger"
+                    onPress={handleDelete}
+                  >
+                    Delete
+                  </DropdownItem>
+                </>
+              ) : null}
+            </DropdownMenu>
+          </Dropdown>
         }
       />
 
@@ -194,7 +307,7 @@ const Detail = ({ activityId }: Props) => {
                 size="sm"
                 variant="dot"
                 radius="sm"
-                color={activityStatusEnum[activity.status].color}
+                color={activity.endDate ? "default" : "warning"}
               >
                 {displayIntervalDate(activity.startDate)}
               </Chip>
@@ -217,7 +330,10 @@ const Detail = ({ activityId }: Props) => {
 
           <div className="space-y-3 my-4">
             <div className="flex items-start gap-3">
-              <CalendarIcon className="size-5 ms-1 text-primary shrink-0" />
+              <CalendarMark
+                weight="Broken"
+                className="size-5 ms-1 text-primary shrink-0"
+              />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">
                   {fns.format(
@@ -237,7 +353,10 @@ const Detail = ({ activityId }: Props) => {
 
             {/* Location */}
             <div className="flex gap-3 items-start">
-              <MapPoinWaveIcon className="size-5 ms-1 text-primary shrink-0" />
+              <MapPointWave
+                weight="Broken"
+                className="size-5 ms-1 text-primary shrink-0"
+              />
               <div className="flex-1">
                 <p className="text-sm font-medium text-foreground">
                   {activity.location}
@@ -246,7 +365,7 @@ const Detail = ({ activityId }: Props) => {
                   <Link href={activity.mapsUrl} target="_blank">
                     <p className="flex items-center gap-1 text-xs text-primary">
                       Lihat Maps
-                      <ArrowUpRightFromSquareIcon className="size-3" />
+                      <SquareTopDown weight="Broken" className="size-3" />
                     </p>
                   </Link>
                 ) : (
@@ -276,12 +395,15 @@ const Detail = ({ activityId }: Props) => {
           <Card className="p-4 gap-3 shadow-md" fullWidth>
             <div className="flex items-center justify-between w-full">
               <div className="flex items-center gap-2">
-                <TextSelectIcon className="w-5 h-5 text-primary" />
+                <DocumentAdd
+                  weight="BoldDuotone"
+                  className="w-5 h-5 text-primary"
+                />
                 <h2 className="text-lg font-bold">Catatan</h2>
                 <span className="text-muted">({activity.notes.length})</span>
               </div>
               <Button size="sm" variant="flat" color="primary">
-                <EditIcon className="size-3" />
+                <PenNewSquare weight="Broken" className="size-3" />
                 Edit
               </Button>
             </div>
@@ -315,7 +437,10 @@ const Detail = ({ activityId }: Props) => {
             <CardHeader className="pb-2 px-4 pt-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
-                  <UsersIcon className="w-5 h-5 text-primary" />
+                  <UsersGroupRounded
+                    weight="BoldDuotone"
+                    className="w-5 h-5 text-primary"
+                  />
                   <h2 className="text-lg font-bold">Kehadiran</h2>
                 </div>
                 <Chip size="sm" variant="flat" color="primary">
@@ -397,7 +522,10 @@ const Detail = ({ activityId }: Props) => {
             <CardHeader className="pb-2 px-4 pt-4">
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-2">
-                  <WalletIcon className="w-5 h-5 text-success" />
+                  <Wallet
+                    weight="BoldDuotone"
+                    className="w-5 h-5 text-success"
+                  />
                   <h2 className="text-lg font-bold">Anggaran</h2>
                 </div>
               </div>

@@ -18,28 +18,28 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@heroui/react";
-import {
-  MapPinIcon,
-  LinkIcon,
-  Globe2Icon,
-  LockKeyholeIcon,
-  LayersIcon,
-  PlusIcon,
-  InfoIcon,
-} from "lucide-react";
+
 import { ActivityType } from "@/lib/generated/prisma/enums";
 import { useCreateActivity } from "@/hooks/queries/activity";
 import Navbar from "../navbar";
-import {
-  CalendarIcon,
-  CheckReadIcon,
-  MapPoinWaveIcon,
-  TrashIcon,
-} from "@/components/icons";
+
 import { formatErrors } from "@/lib/utils";
 import clsx from "clsx";
 import { activityTypeEnum } from "@/config/enums";
 import axios from "axios";
+import {
+  AddSquare,
+  Calendar,
+  CalendarAdd,
+  DocumentAdd,
+  Global,
+  InfoCircle,
+  Link,
+  LockKeyhole,
+  MapPointWave,
+  TrashBinTrash,
+  WidgetAdd,
+} from "@solar-icons/react";
 
 const NewActivity = () => {
   const router = useRouter();
@@ -53,7 +53,6 @@ const NewActivity = () => {
     visibility: "private",
     type: "" as ActivityType,
     startDate: "",
-    endDate: "",
   });
   const [notes, setNotes] = useState<string[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -89,9 +88,6 @@ const NewActivity = () => {
         startDate: formData.startDate
           ? new Date(formData.startDate).toISOString()
           : "",
-        endDate: formData.endDate
-          ? new Date(formData.endDate).toISOString()
-          : undefined,
         notes: notes.map((note) => note.trim()),
       };
 
@@ -137,7 +133,7 @@ const NewActivity = () => {
                 variant="light"
                 isIconOnly
               >
-                <InfoIcon className="size-4" />
+                <InfoCircle weight="Broken" className="size-4" />
               </Button>
             </PopoverTrigger>
             <PopoverContent>
@@ -170,7 +166,7 @@ const NewActivity = () => {
           <Card shadow="sm" fullWidth className="">
             <CardBody className="p-5 space-y-4">
               <h3 className="font-semibold flex items-center gap-2.5">
-                <CalendarIcon className="size-5 text-secondary" />
+                <Calendar weight="Broken" className="size-5 text-secondary" />
                 Basic Information
               </h3>
               <Divider />
@@ -210,7 +206,7 @@ const NewActivity = () => {
           <Card shadow="sm" fullWidth className="">
             <CardBody className="p-5 space-y-4">
               <h3 className="font-semibold flex items-center gap-2.5">
-                <CalendarIcon className="size-5 text-secondary" />
+                <WidgetAdd weight="Broken" className="size-5 text-secondary" />
                 Additional Information
               </h3>
               <Divider />
@@ -268,8 +264,8 @@ const NewActivity = () => {
               </Select>
               <Select
                 items={[
-                  { key: "private", label: "Private", icon: LockKeyholeIcon },
-                  { key: "public", label: "Public", icon: Globe2Icon },
+                  { key: "private", label: "Private", icon: LockKeyhole },
+                  { key: "public", label: "Public", icon: Global },
                 ]}
                 variant="flat"
                 name="visibility"
@@ -329,7 +325,10 @@ const NewActivity = () => {
           <Card shadow="sm" fullWidth className="">
             <CardBody className="p-5 space-y-4">
               <h3 className="font-semibold flex items-center gap-2.5">
-                <MapPoinWaveIcon className="size-5 text-secondary" />
+                <MapPointWave
+                  weight="Broken"
+                  className="size-5 text-secondary"
+                />
                 Location & Time
               </h3>
               <Divider />
@@ -347,7 +346,12 @@ const NewActivity = () => {
                 variant="flat"
                 isInvalid={!!errors.location}
                 errorMessage={errors.location}
-                startContent={<MapPinIcon className="size-4 text-muted me-1" />}
+                startContent={
+                  <MapPointWave
+                    weight="Broken"
+                    className="size-4 text-muted me-1"
+                  />
+                }
               />
 
               <Input
@@ -361,7 +365,9 @@ const NewActivity = () => {
                 variant="flat"
                 isInvalid={!!errors.mapsUrl}
                 errorMessage={errors.mapsUrl}
-                startContent={<LinkIcon className="size-4 text-muted me-1" />}
+                startContent={
+                  <Link weight="Broken" className="size-4 text-muted me-1" />
+                }
               />
 
               <Input
@@ -375,17 +381,6 @@ const NewActivity = () => {
                 isInvalid={!!errors.startDate}
                 errorMessage={errors.startDate}
               />
-              <Input
-                name="endDate"
-                type="datetime-local"
-                label="End Date (Optional)"
-                labelPlacement="outside-top"
-                variant="flat"
-                value={formData.endDate}
-                onChange={handleChange}
-                isInvalid={!!errors.endDate}
-                errorMessage={errors.endDate}
-              />
             </CardBody>
           </Card>
 
@@ -393,7 +388,10 @@ const NewActivity = () => {
           <Card shadow="sm" fullWidth className="">
             <CardBody className="p-5 space-y-4">
               <div className="flex items-center gap-2.5">
-                <LayersIcon className="size-5 text-secondary" />
+                <DocumentAdd
+                  weight="Broken"
+                  className="size-5 text-secondary"
+                />
                 <h3 className="font-semibold">
                   Notes <span className="text-muted">(Optional)</span>
                 </h3>
@@ -401,7 +399,9 @@ const NewActivity = () => {
                   size="sm"
                   className="ms-auto"
                   color="primary"
-                  startContent={<PlusIcon className="size-4" />}
+                  startContent={
+                    <AddSquare weight="Broken" className="size-4" />
+                  }
                   variant="flat"
                   onPress={() => {
                     const newNotes = [...notes];
@@ -442,7 +442,7 @@ const NewActivity = () => {
                       setNotes(newNotes);
                     }}
                   >
-                    <TrashIcon className="size-4.5" />
+                    <TrashBinTrash weight="Broken" className="size-4.5" />
                   </Button>
                 </div>
               ))}
@@ -468,7 +468,7 @@ const NewActivity = () => {
           size="lg"
           isLoading={createActivityMutation.isPending}
           onPress={() => formRef.current?.requestSubmit()}
-          startContent={<CheckReadIcon className="size-7" />}
+          startContent={<CalendarAdd weight="Broken" className="size-7" />}
         >
           Create Activity
         </Button>

@@ -21,7 +21,6 @@ import {
   addToast,
   useDisclosure,
 } from "@heroui/react";
-import { MailPlusIcon, TrashIcon, UserCogIcon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Role } from "@/lib/generated/prisma/enums";
@@ -36,6 +35,12 @@ import {
 } from "@/hooks/queries/organization";
 import { OrganizationInvitation, OrganizationUser } from "@/types";
 import { roleEnum } from "@/config/enums";
+import {
+  CloseCircle,
+  Settings,
+  TrashBinMinimalistic,
+  UserPlus,
+} from "@solar-icons/react";
 
 const OrganizationUsers = () => {
   const auth = useAuth();
@@ -187,7 +192,7 @@ const OrganizationUsers = () => {
             <Button
               color="primary"
               size="sm"
-              startContent={<MailPlusIcon className="w-4 h-4" />}
+              startContent={<UserPlus weight="Broken" className="w-4 h-4" />}
               onPress={inviteModal.onOpen}
             >
               Undang
@@ -246,7 +251,7 @@ const OrganizationUsers = () => {
                         variant="light"
                         onPress={() => openRoleModal(member)}
                       >
-                        <UserCogIcon className="w-4 h-4" />
+                        <Settings weight="Broken" className="w-4 h-4" />
                       </Button>
                       <Button
                         isIconOnly
@@ -255,7 +260,10 @@ const OrganizationUsers = () => {
                         color="danger"
                         onPress={() => openRemoveModal(member)}
                       >
-                        <TrashIcon className="w-4 h-4" />
+                        <TrashBinMinimalistic
+                          weight="Broken"
+                          className="w-4 h-4"
+                        />
                       </Button>
                     </div>
                   )}
@@ -310,7 +318,7 @@ const OrganizationUsers = () => {
                       color="danger"
                       onPress={() => openCancelInviteModal(invitation)}
                     >
-                      <XIcon className="w-4 h-4" />
+                      <CloseCircle weight="Broken" className="w-4 h-4" />
                     </Button>
                   </CardBody>
                 </Card>

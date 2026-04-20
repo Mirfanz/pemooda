@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 import { Button, Card, CardBody, Chip, Tabs, Tab } from "@heroui/react";
 import {
-  BellIcon,
-  CalendarIcon,
-  InfoIcon,
-  MegaphoneIcon,
-  CheckCheckIcon,
-} from "lucide-react";
+  Bell,
+  CalendarMark,
+  CheckRead,
+  InfoCircle,
+  VolumeLoud,
+} from "@solar-icons/react";
 
 type NotificationType = "all" | "announcement" | "event" | "system";
 
@@ -84,13 +84,13 @@ const AnnouncementMain = () => {
   const getIcon = (type: string) => {
     switch (type) {
       case "announcement":
-        return <MegaphoneIcon className="size-5" />;
+        return <VolumeLoud weight="Broken" className="size-5" />;
       case "event":
-        return <CalendarIcon className="size-5" />;
+        return <CalendarMark weight="Broken" className="size-5" />;
       case "system":
-        return <InfoIcon className="size-5" />;
+        return <InfoCircle weight="Broken" className="size-5" />;
       default:
-        return <BellIcon className="size-5" />;
+        return <Bell weight="Broken" className="size-5" />;
     }
   };
 
@@ -123,7 +123,7 @@ const AnnouncementMain = () => {
               // variant="flat"
               color="secondary"
               onPress={markAllAsRead}
-              startContent={<CheckCheckIcon className="size-4" />}
+              startContent={<CheckRead weight="Broken" className="size-4" />}
             >
               Tandai Semua
             </Button>
@@ -148,7 +148,10 @@ const AnnouncementMain = () => {
         {filteredNotifications.length === 0 ? (
           <Card className="shadow-sm">
             <CardBody className="text-center py-12">
-              <BellIcon className="size-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+              <Bell
+                weight="Broken"
+                className="size-12 mx-auto mb-3 text-muted-foreground opacity-50"
+              />
               <p className="text-muted-foreground">Tidak ada notifikasi</p>
             </CardBody>
           </Card>

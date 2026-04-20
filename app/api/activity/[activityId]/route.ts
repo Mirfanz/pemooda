@@ -1,5 +1,5 @@
-import { getActivityStatus } from "@/lib/activity";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, hasRole } from "@/lib/auth";
+import { Role } from "@/lib/generated/prisma/enums";
 import prisma from "@/lib/prisma";
 import { Activity } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
@@ -62,7 +62,6 @@ export async function GET(
     title: activity.title,
     isPublic: activity.isPublic,
     description: activity.description,
-    status: getActivityStatus(activity.startDate, activity.endDate),
     type: activity.type,
     startDate: activity.startDate,
     endDate: activity.endDate,
@@ -79,4 +78,95 @@ export async function GET(
     message: "Activity data",
     data,
   });
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ activityId: string }> },
+) {
+  try {
+    const currentUser = await getCurrentUser();
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+    if (!currentUser.organization) {
+      return NextResponse.json(
+        { success: false, message: "Not joined organization yet" },
+        { status: 403 },
+      );
+    }
+    if (!hasRole(currentUser.role, [Role.KETUA, Role.SEKRETARIS]))
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Only leader can delete activity",
+        },
+        { status: 403 },
+      );
+
+    const { activityId } = await params;
+
+    // Delete activity
+    const activity = await prisma.activity.delete({
+      where: {
+        id: activityId,
+        organizationId: currentUser.organization.id,
+      },
+      include: {
+        organization: {
+          select: {
+            id: true,
+            name: true,
+            imageUrl: true,
+            tagline: true,
+          },
+        },
+      },
+    });
+
+    // Update organization summary
+    await prisma.organizationSummary.update({
+      where: { organizationId: currentUser.organization.id },
+      data: {
+        totalActivities: {
+          decrement: 1,
+        },
+      },
+    });
+
+    const activityResponse: Activity = {
+      id: activity.id,
+      title: activity.title,
+      description: activity.description,
+      type: activity.type,
+      isPublic: activity.isPublic,
+      startDate: activity.startDate,
+      endDate: activity.endDate,
+      location: activity.location,
+      mapsUrl: activity.mapsUrl,
+      notes: activity.notes,
+      organization: activity.organization,
+      createdAt: activity.createdAt,
+      updatedAt: activity.updatedAt,
+    };
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Activity created successfully",
+        data: activityResponse,
+      },
+      { status: 201 },
+    );
+  } catch (error) {
+    console.error("Error deleting activity:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 },
+    );
+  }
 }

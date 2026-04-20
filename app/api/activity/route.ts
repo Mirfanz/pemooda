@@ -4,7 +4,6 @@ import { Activity } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { ActivityType, Role } from "@/lib/generated/prisma/enums";
-import { getActivityStatus } from "@/lib/activity";
 
 const createActivitySchema = z.object({
   title: z
@@ -23,8 +22,11 @@ const createActivitySchema = z.object({
   mapsUrl: z.url("Invalid maps URL").optional(),
   type: z.enum(ActivityType),
   isPublic: z.boolean().default(false),
-  startDate: z.iso.datetime("Invalid start date format"),
-  endDate: z.iso.datetime("Invalid end date format").optional(),
+  startDate: z.iso
+    .datetime("Invalid start date format")
+    .refine((val) => new Date(val) >= new Date(), {
+      message: "Start date cannot be in the past",
+    }),
   notes: z.array(z.string()).default([]),
 });
 
@@ -88,7 +90,6 @@ export async function GET(req: NextRequest) {
       title: activity.title,
       isPublic: activity.isPublic,
       description: activity.description,
-      status: getActivityStatus(activity.startDate, activity.endDate),
       type: activity.type,
       startDate: activity.startDate,
       endDate: activity.endDate,
@@ -165,23 +166,8 @@ export async function POST(req: NextRequest) {
       type,
       isPublic,
       startDate,
-      endDate,
       notes,
     } = validation.data;
-
-    // Validate end date is after start date if provided
-    if (endDate && new Date(endDate) <= new Date(startDate)) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "End date must be after start date",
-          errors: {
-            endDate: ["End date must be after start date"],
-          },
-        },
-        { status: 400 },
-      );
-    }
 
     // Create activity
     const activity = await prisma.activity.create({
@@ -193,7 +179,6 @@ export async function POST(req: NextRequest) {
         type,
         isPublic,
         startDate: new Date(startDate),
-        endDate: endDate ? new Date(endDate) : null,
         notes,
         organizationId: currentUser.organization.id,
         createdBy: currentUser.id,
@@ -224,7 +209,6 @@ export async function POST(req: NextRequest) {
       id: activity.id,
       title: activity.title,
       description: activity.description,
-      status: "UPCOMING",
       type: activity.type,
       isPublic: activity.isPublic,
       startDate: activity.startDate,

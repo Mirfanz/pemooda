@@ -68,14 +68,11 @@ export interface OrganizationInvitation {
   creator: UserMinimal;
 }
 
-export type ActivityStatus = "UPCOMING" | "ONGOING" | "ENDED";
-
 export interface Activity {
   id: string;
   title: string;
   description: string | null;
   notes: string[];
-  status: ActivityStatus;
   type: ActivityType;
   isPublic: boolean;
   startDate: Date | string;

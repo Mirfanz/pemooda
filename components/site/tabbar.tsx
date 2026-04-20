@@ -6,36 +6,36 @@ import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
-  BellBoldIcon,
-  CalendarBoldIcon,
-  HomeBoldIcon,
-  UserBoldIcon,
-  WalletBoldIcon,
-} from "../icons";
+  BellBing,
+  CalendarMark,
+  Home,
+  UserRounded,
+  Wallet,
+} from "@solar-icons/react";
 
 const items = [
-  { label: "Home", icon: HomeBoldIcon, href: "/", regex: /^\/$/ },
+  { label: "Home", icon: Home, href: "/", regex: /^\/$/ },
   {
     label: "Activity",
-    icon: CalendarBoldIcon,
+    icon: CalendarMark,
     href: "/activity",
     regex: /^\/activity/,
   },
   {
     label: "Finance",
-    icon: WalletBoldIcon,
+    icon: Wallet,
     href: "/finance",
     regex: /^\/finance/,
   },
   {
     label: "Announcement",
-    icon: BellBoldIcon,
+    icon: BellBing,
     href: "/announcement",
     regex: /^\/announcement/,
   },
   {
     label: "Account",
-    icon: UserBoldIcon,
+    icon: UserRounded,
     href: "/account",
     regex: /^\/account/,
   },
@@ -64,7 +64,7 @@ const Tabbar = ({ className, ...props }: {} & React.ComponentProps<"nav">) => {
             key={item.href}
             as={Link}
             href={item.href}
-            title={<item.icon className="size-4.5" />}
+            title={<item.icon weight="Bold" className="size-5" />}
           />
         ))}
       </Tabs>

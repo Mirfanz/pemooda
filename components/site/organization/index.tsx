@@ -16,23 +16,7 @@ import {
   useDisclosure,
   addToast,
 } from "@heroui/react";
-import {
-  BuildingIcon,
-  MapPinIcon,
-  PhoneIcon,
-  SettingsIcon,
-  UsersIcon,
-  CalendarIcon,
-  QrCodeIcon,
-} from "lucide-react";
-import {
-  CalendarBoldIcon,
-  InstagramIcon,
-  TwitterXIcon,
-  UsersBoldIcon,
-  WalletBoldIcon,
-  WhatsappIcon,
-} from "@/components/icons";
+
 import Link from "next/link";
 import NoOrganizationContent from "./no-organization";
 import { Role } from "@/lib/generated/prisma/enums";
@@ -42,26 +26,37 @@ import {
 } from "@/hooks/queries/organization";
 import { roleEnum } from "@/config/enums";
 import { cn } from "@/lib/utils";
+import {
+  CalendarMark,
+  MapPointWave,
+  Phone,
+  QrCode,
+  Settings,
+  UsersGroupRounded,
+  UsersGroupTwoRounded,
+  WalletMoney,
+} from "@solar-icons/react";
+import { InstagramIcon, TwitterXIcon, WhatsappIcon } from "@/components/icons";
 
 const fastMenuItems = [
   {
     label: "Absen",
-    icon: QrCodeIcon,
+    icon: QrCode,
     href: "/absen",
   },
   {
     label: "Anggota",
-    icon: UsersBoldIcon,
+    icon: UsersGroupRounded,
     href: "/organization/members",
   },
   {
     label: "Kegiatan",
-    icon: CalendarBoldIcon,
+    icon: CalendarMark,
     href: "/activity",
   },
   {
     label: "Keuangan",
-    icon: WalletBoldIcon,
+    icon: WalletMoney,
     href: "/finance",
   },
 ];
@@ -118,7 +113,7 @@ const Organization = () => {
               variant="light"
               className="text-white"
             >
-              <SettingsIcon className="w-5 h-5" />
+              <Settings weight="Broken" className="w-5 h-5" />
             </Button>
           )}
         </div>
@@ -126,7 +121,9 @@ const Organization = () => {
           <Avatar
             src={organization.data.imageUrl || undefined}
             className="w-20 h-20 mx-auto mb-3 ring-4 ring-white/30"
-            fallback={<BuildingIcon className="w-8 h-8" />}
+            fallback={
+              <UsersGroupTwoRounded weight="Broken" className="w-8 h-8" />
+            }
           />
           <h2 className="text-xl font-bold">{organization.data.name}</h2>
           {organization.data.tagline && (
@@ -143,18 +140,25 @@ const Organization = () => {
           <Card className="shadow-lg">
             <CardBody className="text-center py-4">
               <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-2">
-                <UsersIcon className="w-5 h-5 text-primary-600" />
+                <UsersGroupRounded
+                  weight="Broken"
+                  className="w-5 h-5 text-primary-600"
+                />
               </div>
               <p className="text-2xl font-bold text-primary-600">
                 {organization.data.summary?.totalMembers || 0}
               </p>
+
               <p className="text-xs text-muted-foreground">Anggota</p>
             </CardBody>
           </Card>
           <Card className="shadow-lg">
             <CardBody className="text-center py-4">
               <div className="w-10 h-10 rounded-full bg-success-100 flex items-center justify-center mx-auto mb-2">
-                <CalendarIcon className="w-5 h-5 text-success-600" />
+                <CalendarMark
+                  weight="Broken"
+                  className="w-5 h-5 text-success-600"
+                />
               </div>
               <p className="text-2xl font-bold text-success-600">
                 {organization.data.summary?.totalActivities || 0}
@@ -199,7 +203,9 @@ const Organization = () => {
                   "flex-col shadow-lg gap-1 border-1 aspect-square min-w-0 size-auto",
                   "shadow-teal-600/10 bg-teal-600/5 border-teal-600 text-teal-600",
                 )}
-                startContent={<item.icon className="size-7" />}
+                startContent={
+                  <item.icon weight="BoldDuotone" className="size-7" />
+                }
               >
                 <small className="text-xs font-medium">{item.label}</small>
               </Button>
@@ -218,7 +224,7 @@ const Organization = () => {
             {organization.data.phone && (
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-success-100 flex items-center justify-center">
-                  <PhoneIcon className="w-4 h-4 text-success-600" />
+                  <Phone weight="Broken" className="w-4 h-4 text-success-600" />
                 </div>
                 <span className="text-sm">{organization.data.phone}</span>
               </div>
@@ -226,7 +232,10 @@ const Organization = () => {
             {organization.data.address && (
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-warning-100 flex items-center justify-center">
-                  <MapPinIcon className="w-4 h-4 text-warning-600" />
+                  <MapPointWave
+                    weight="Broken"
+                    className="w-4 h-4 text-warning-600"
+                  />
                 </div>
                 <span className="text-sm">{organization.data.address}</span>
               </div>

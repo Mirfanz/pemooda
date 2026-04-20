@@ -15,7 +15,6 @@ import {
   ModalFooter,
   useDisclosure,
 } from "@heroui/react";
-import { BuildingIcon, PlusIcon, MailIcon, CheckIcon } from "lucide-react";
 import { useState } from "react";
 import { OrganizationInvitation } from "@/types";
 import Link from "next/link";
@@ -24,6 +23,12 @@ import {
   useAcceptInvitation,
   useRejectInvitation,
 } from "@/hooks/queries/organization";
+import {
+  AddSquare,
+  BillCheck,
+  LetterOpened,
+  UsersGroupTwoRounded,
+} from "@solar-icons/react";
 
 const NoOrganization = () => {
   const auth = useAuth();
@@ -80,7 +85,10 @@ const NoOrganization = () => {
     <main className="p-4">
       <div className="text-center py-8">
         <div className="w-20 h-20 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
-          <BuildingIcon className="w-10 h-10 text-primary-500" />
+          <UsersGroupTwoRounded
+            weight="BoldDuotone"
+            className="w-10 h-10 text-primary-500"
+          />
         </div>
         <h1 className="text-xl font-bold mb-2">Belum Ada Organisasi</h1>
         <p className="text-muted-foreground text-sm">
@@ -92,7 +100,7 @@ const NoOrganization = () => {
         <CardBody className="p-4">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-              <PlusIcon className="w-5 h-5 text-primary-600" />
+              <AddSquare weight="Broken" className="w-5 h-5 text-primary-600" />
             </div>
             <div>
               <h3 className="font-semibold">Buat Organisasi Baru</h3>
@@ -114,7 +122,10 @@ const NoOrganization = () => {
 
       <div>
         <div className="flex items-center gap-2 mb-3">
-          <MailIcon className="w-4 h-4 text-muted-foreground" />
+          <LetterOpened
+            weight="Broken"
+            className="w-4 h-4 text-muted-foreground"
+          />
           <h2 className="font-semibold text-sm text-muted-foreground">
             Undangan Bergabung
           </h2>
@@ -141,7 +152,12 @@ const NoOrganization = () => {
                   <div className="flex items-start gap-3">
                     <Avatar
                       src={invitation.organization.imageUrl || undefined}
-                      fallback={<BuildingIcon className="w-4 h-4" />}
+                      fallback={
+                        <UsersGroupTwoRounded
+                          weight="Broken"
+                          className="w-4 h-4"
+                        />
+                      }
                       size="sm"
                     />
                     <div className="flex-1 min-w-0">
@@ -171,7 +187,9 @@ const NoOrganization = () => {
                       color="success"
                       size="sm"
                       className="flex-1"
-                      startContent={<CheckIcon className="w-4 h-4" />}
+                      startContent={
+                        <BillCheck weight="Bold" className="w-4 h-4" />
+                      }
                       isLoading={acceptMutation.isPending}
                       onPress={() => handleAccept(invitation.id)}
                     >

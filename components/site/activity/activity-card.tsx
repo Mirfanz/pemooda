@@ -1,14 +1,17 @@
 "use client";
 
-import { CalendarIcon, MapPoinWaveIcon } from "@/components/icons";
-import { activityStatusEnum, activityTypeEnum } from "@/config/enums";
+import { activityTypeEnum } from "@/config/enums";
 import type { Activity } from "@/types";
-import { Button, Card, CardBody, Chip, Divider, User } from "@heroui/react";
-import { CheckCircle2Icon, ClockIcon, PlusIcon } from "lucide-react";
+import { Card, CardBody, Chip, Divider, User } from "@heroui/react";
 import React from "react";
 import dayjs from "dayjs";
 import Link from "next/link";
 import { displayIntervalDate } from "@/lib/utils";
+import {
+  CalendarMark,
+  ClockCircle,
+  MapPointWave,
+} from "@solar-icons/react";
 
 type Props = {
   activity: Activity;
@@ -35,7 +38,7 @@ const ActivityCard = ({ activity }: Props) => {
               <div className="flex items-center gap-2 mb-2">
                 <Chip
                   size="sm"
-                  color={activityStatusEnum[activity.status].color}
+                  color={activity.endDate ? "default" : "warning"}
                   variant="dot"
                   radius="sm"
                 >
@@ -69,18 +72,21 @@ const ActivityCard = ({ activity }: Props) => {
 
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm">
-              <CalendarIcon className="size-4 text-primary" />
+              <CalendarMark weight="Broken" className="size-4 text-primary" />
               <span className="text-muted-foreground">
                 {dayjs(activity.startDate).format("DD MMM YYYY")}
               </span>
-              <ClockIcon className="size-4 text-primary ml-2" />
+              <ClockCircle
+                weight="Broken"
+                className="size-4 text-primary ml-2"
+              />
               <span className="text-muted-foreground">
                 {dayjs(activity.startDate).format("HH:mm")}
               </span>
               {/* <span className="text-muted-foreground">{"00:00 - Selesai"}</span> */}
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <MapPoinWaveIcon className="size-4 text-primary" />
+              <MapPointWave weight="Broken" className="size-4 text-primary" />
               <span className="text-muted-foreground">{activity.location}</span>
             </div>
           </div>
@@ -105,24 +111,6 @@ const ActivityCard = ({ activity }: Props) => {
                 wrapper: "flex-1",
               }}
             />
-
-            {activity.status === "UPCOMING" && (
-              <Button
-                size="sm"
-                className="hidden"
-                color={activity.isPublic ? "default" : "primary"}
-                variant={activity.isPublic ? "flat" : "solid"}
-                startContent={
-                  activity.isPublic ? (
-                    <CheckCircle2Icon className="size-4" />
-                  ) : (
-                    <PlusIcon className="size-4" />
-                  )
-                }
-              >
-                {activity.isPublic ? "Terdaftar" : "Daftar"}
-              </Button>
-            )}
           </div>
         </div>
       </CardBody>

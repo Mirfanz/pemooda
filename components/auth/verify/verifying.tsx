@@ -1,12 +1,12 @@
 "use client";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@heroui/react";
-import { MailCheckIcon } from "lucide-react";
 import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import axios from "axios";
 import Verified from "./verified";
 import Unverified from "./unverified";
+import { CheckRead, VerifiedCheck } from "@solar-icons/react";
 
 const Verifying = () => {
   const { refreshUser, user } = useAuth();
@@ -52,7 +52,7 @@ const Verifying = () => {
           isIconOnly
           className="size-18 shadow-lg mb-4 rounded-3xl"
         >
-          <MailCheckIcon className="size-12" />
+          <VerifiedCheck weight="BoldDuotone" className="size-12" />
         </Button>
         <h1 className="text-2xl font-bold mb-2">Verify Account</h1>
         <p className="text-muted text-sm">
@@ -71,7 +71,7 @@ const Verifying = () => {
           "Verifying..."
         ) : (
           <>
-            <MailCheckIcon className="size-4" />
+            <CheckRead weight="Broken" className="size-4" />
             Verify Account
           </>
         )}

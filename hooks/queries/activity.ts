@@ -24,7 +24,6 @@ interface CreateActivityData {
   type: ActivityType;
   isPublic: boolean;
   startDate: string;
-  endDate?: string;
   notes: string[];
 }
 
@@ -71,6 +70,17 @@ export function useCreateActivity() {
   return useMutation({
     mutationFn: async (data: CreateActivityData) =>
       axios.post("/api/activity", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
+    },
+  });
+}
+
+export function useDeleteActivity() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => axios.delete(`/api/activity/${id}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: activityKeys.all });
     },

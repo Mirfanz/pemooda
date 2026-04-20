@@ -2,22 +2,24 @@
 
 import React from "react";
 import { Button, Card, CardBody, Divider, Avatar, Chip } from "@heroui/react";
-import {
-  MailIcon,
-  PhoneIcon,
-  MapPinIcon,
-  ShieldCheckIcon,
-  LogOutIcon,
-  ChevronRightIcon,
-  SettingsIcon,
-  BellIcon,
-  LockIcon,
-  HelpCircleIcon,
-  FileTextIcon,
-  CreditCardIcon,
-} from "lucide-react";
+
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
+import {
+  Bell,
+  Card2,
+  Danger,
+  Document2,
+  DoubleAltArrowRight,
+  Letter,
+  Logout2,
+  MapPointWave,
+  Phone,
+  Settings,
+  Shield,
+  ShieldCheck,
+  ShieldWarning,
+} from "@solar-icons/react";
 
 const Account = () => {
   const { user, logout } = useAuth();
@@ -30,25 +32,25 @@ const Account = () => {
 
   const menuItems = [
     {
-      icon: SettingsIcon,
+      icon: Settings,
       label: "Pengaturan Akun",
       description: "Kelola informasi pribadi",
       href: "/account/settings",
     },
     {
-      icon: BellIcon,
+      icon: Bell,
       label: "Notifikasi",
       description: "Atur preferensi notifikasi",
       href: "/account/notifications",
     },
     {
-      icon: LockIcon,
+      icon: Shield,
       label: "Keamanan",
       description: "Password dan keamanan",
       href: "/account/security",
     },
     {
-      icon: CreditCardIcon,
+      icon: Card2,
       label: "Metode Pembayaran",
       description: "Kelola metode pembayaran",
       href: "/account/payment",
@@ -57,17 +59,17 @@ const Account = () => {
 
   const supportItems = [
     {
-      icon: HelpCircleIcon,
+      icon: Danger,
       label: "Bantuan & Dukungan",
       href: "/help",
     },
     {
-      icon: FileTextIcon,
+      icon: Document2,
       label: "Syarat & Ketentuan",
       href: "/terms",
     },
     {
-      icon: ShieldCheckIcon,
+      icon: ShieldWarning,
       label: "Kebijakan Privasi",
       href: "/privacy",
     },
@@ -91,9 +93,9 @@ const Account = () => {
               size="sm"
               variant="flat"
               className="bg-white/20 text-white"
-              startContent={<ShieldCheckIcon className="size-3" />}
+              startContent={<ShieldCheck weight="Bold" className="size-3" />}
             >
-              Anggota Aktif
+              {user?.role}
             </Chip>
           </div>
         </div>
@@ -115,7 +117,7 @@ const Account = () => {
           <CardBody className="p-4 space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary">
-                <MailIcon className="size-5" />
+                <Letter weight="Broken" className="size-5" />
               </div>
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">Email</p>
@@ -127,7 +129,7 @@ const Account = () => {
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-success-50 flex items-center justify-center text-success">
-                <PhoneIcon className="size-5" />
+                <Phone weight="Broken" className="size-5" />
               </div>
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">Telepon</p>
@@ -139,7 +141,7 @@ const Account = () => {
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-warning-50 flex items-center justify-center text-warning">
-                <MapPinIcon className="size-5" />
+                <MapPointWave weight="Broken" className="size-5" />
               </div>
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">Alamat</p>
@@ -172,7 +174,10 @@ const Account = () => {
                           {item.description}
                         </p>
                       </div>
-                      <ChevronRightIcon className="size-5 text-muted-foreground" />
+                      <DoubleAltArrowRight
+                        weight="Broken"
+                        className="size-5 text-muted-foreground"
+                      />
                     </div>
                   </Button>
                   {index < menuItems.length - 1 && <Divider />}
@@ -200,7 +205,10 @@ const Account = () => {
                       <p className="font-medium text-sm flex-1 text-left">
                         {item.label}
                       </p>
-                      <ChevronRightIcon className="size-5 text-muted-foreground" />
+                      <DoubleAltArrowRight
+                        weight="Broken"
+                        className="size-5 text-muted-foreground"
+                      />
                     </div>
                   </Button>
                   {index < supportItems.length - 1 && <Divider />}
@@ -215,7 +223,7 @@ const Account = () => {
           variant="flat"
           className="w-full"
           size="lg"
-          startContent={<LogOutIcon className="size-5" />}
+          startContent={<Logout2 weight="Broken" className="size-5" />}
           onPress={handleLogout}
         >
           Keluar

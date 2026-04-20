@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button, Form, Input } from "@heroui/react";
-import { RotateCcwKeyIcon, EyeClosedIcon, EyeIcon } from "lucide-react";
+import { Eye, EyeClosed, KeySquare2 } from "@solar-icons/react";
 
 const ChangePassword = () => {
   const [formData, setFormData] = useState({
@@ -50,7 +50,7 @@ const ChangePassword = () => {
           color="primary"
           isIconOnly
         >
-          <RotateCcwKeyIcon className="size-10" />
+          <KeySquare2 weight="BoldDuotone" className="size-10" />
         </Button>
         <h1 className="text-2xl font-bold mb-2">Change Password</h1>
         <p className="text-muted text-sm">
@@ -87,9 +87,9 @@ const ChangePassword = () => {
               variant="light"
             >
               {showNewPassword ? (
-                <EyeIcon className="size-4" />
+                <Eye weight="Broken" className="size-4" />
               ) : (
-                <EyeClosedIcon className="size-4" />
+                <EyeClosed weight="Broken" className="size-4" />
               )}
             </Button>
           }
@@ -120,9 +120,9 @@ const ChangePassword = () => {
               variant="light"
             >
               {showConfirmPassword ? (
-                <EyeIcon className="size-4" />
+                <Eye weight="Broken" className="size-4" />
               ) : (
-                <EyeClosedIcon className="size-4" />
+                <EyeClosed weight="Broken" className="size-4" />
               )}
             </Button>
           }

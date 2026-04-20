@@ -10,12 +10,12 @@ import {
   Skeleton,
   addToast,
 } from "@heroui/react";
-import { SaveIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import Navbar from "../navbar";
 import { useOrganizationDetail } from "@/hooks/queries/organization";
+import { CheckRead } from "@solar-icons/react";
 
 const OrganizationSettings = () => {
   const auth = useAuth();
@@ -170,7 +170,9 @@ const OrganizationSettings = () => {
           color="primary"
           className="w-full"
           size="lg"
-          startContent={!saving && <SaveIcon className="w-5 h-5" />}
+          startContent={
+            !saving && <CheckRead weight="Broken" className="w-5 h-5" />
+          }
           isLoading={saving}
           onPress={handleSubmit}
         >

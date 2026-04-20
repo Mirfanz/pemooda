@@ -2,7 +2,7 @@
 
 import { useCountdown } from "@/hooks/countdown";
 import { Card, CardBody } from "@heroui/react";
-import { ClockIcon } from "lucide-react";
+import { ClockCircle } from "@solar-icons/react";
 
 type Props = { targetDate: Date | string };
 
@@ -24,7 +24,7 @@ const Countdown = (props: Props) => {
     <Card className="bg-linear-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800 shadow-lg">
       <CardBody className="p-4">
         <div className="flex items-center gap-2 mb-3">
-          <ClockIcon className="w-5 h-5 text-primary" />
+          <ClockCircle weight="Broken" className="w-5 h-5 text-primary" />
           <h3 className="text-sm font-semibold text-primary">
             {isPast ? "Kegiatan Telah Dimulai" : "Hitung Mundur Acara :"}
           </h3>

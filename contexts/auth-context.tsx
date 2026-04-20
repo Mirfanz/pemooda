@@ -11,12 +11,13 @@ import {
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { User } from "@/types";
+import { Role } from "@/lib/generated/prisma/enums";
 
 interface AuthContextType {
   user: User | null;
   isLoggedIn: boolean;
   isLoading: boolean;
-  hasRole: (role: string | string[], user?: User | null) => boolean;
+  hasRole: (role: Role | Role[], user?: User | null) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const roles = Array.isArray(role) ? role : [role];
       return roles.includes(userToCheck.role);
     },
-    [user]
+    [user],
   );
 
   const logout = useCallback(async () => {

@@ -5,9 +5,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import axios from "axios";
 import { Button, Form, Input } from "@heroui/react";
-import { EyeIcon, MailIcon, LockIcon, EyeClosedIcon } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/auth-context";
+import { Eye, EyeClosed, Letter, LockPassword } from "@solar-icons/react";
 
 const Login = () => {
   const router = useRouter();
@@ -83,7 +83,9 @@ const Login = () => {
           placeholder="example@gmail.com"
           isInvalid={!!errors.email?.length || undefined}
           errorMessage={errors.email?.[0]}
-          startContent={<MailIcon className="size-4 text-muted mr-1" />}
+          startContent={
+            <Letter weight="Broken" className="size-4 text-muted mr-1" />
+          }
         />
 
         <div className="w-full">
@@ -108,7 +110,12 @@ const Login = () => {
             onInput={handleChange}
             isInvalid={!!errors.password?.length || undefined}
             errorMessage={errors.password?.[0]}
-            startContent={<LockIcon className="size-4 text-muted mr-1" />}
+            startContent={
+              <LockPassword
+                weight="Broken"
+                className="size-4 text-muted mr-1"
+              />
+            }
             endContent={
               <Button
                 onPress={() => setShowPassword((prev) => !prev)}
@@ -119,9 +126,9 @@ const Login = () => {
                 variant="light"
               >
                 {showPassword ? (
-                  <EyeIcon className="size-4" />
+                  <Eye weight="Broken" className="size-4" />
                 ) : (
-                  <EyeClosedIcon className="size-4" />
+                  <EyeClosed weight="Broken" className="size-4" />
                 )}
               </Button>
             }

@@ -4,14 +4,14 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Alert, Button, Chip, Divider } from "@heroui/react";
-import {
-  MailCheckIcon,
-  ArrowLeftIcon,
-  RefreshCwIcon,
-  CheckCircleIcon,
-} from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import Verified from "./verified";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Restart,
+  VerifiedCheck,
+} from "@solar-icons/react";
 
 const Verify = () => {
   const router = useRouter();
@@ -55,7 +55,7 @@ const Verify = () => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         setResendError(
-          error.response.data.message || "Gagal mengirim ulang verifikasi"
+          error.response.data.message || "Gagal mengirim ulang verifikasi",
         );
       } else {
         setResendError("Terjadi kesalahan");
@@ -104,7 +104,7 @@ const Verify = () => {
           isIconOnly
           className="size-18 rounded-3xl shadow-lg mb-4"
         >
-          <MailCheckIcon className="size-11" />
+          <VerifiedCheck weight="BoldDuotone" className="size-11" />
         </Button>
         <h1 className="text-3xl font-bold mb-2">Verify Account</h1>
         <p className="text-muted mb-4">
@@ -118,7 +118,7 @@ const Verify = () => {
       </div>
       <div className="bg-primary/5 rounded-lg p-6 mb-6">
         <h3 className="font-semibold mb-3 flex items-center gap-2">
-          <CheckCircleIcon className="size-5" />
+          <CheckCircle weight="Broken" className="size-5" />
           Already Verified?
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
@@ -152,7 +152,7 @@ const Verify = () => {
             "Checking Status..."
           ) : (
             <>
-              <CheckCircleIcon className="size-4" />
+              <CheckCircle weight="Broken" className="size-4" />
               Check Status
             </>
           )}
@@ -198,7 +198,7 @@ const Verify = () => {
                 "Sending..."
               ) : (
                 <>
-                  <RefreshCwIcon className="size-4" />
+                  <Restart weight="Broken" className="size-4" />
                   Resend Email
                 </>
               )}
@@ -209,7 +209,7 @@ const Verify = () => {
       <Divider orientation="horizontal" />
       <div className="mt-6">
         <Button fullWidth variant="ghost" onPress={logout}>
-          <ArrowLeftIcon className="size-4" />
+          <ArrowLeft weight="Linear" className="size-4" />
           Back to Login
         </Button>
       </div>

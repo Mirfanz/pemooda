@@ -3,7 +3,7 @@ import React from "react";
 import { Button } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "../icons";
+import { ArrowLeft } from "@solar-icons/react";
 
 type Props = {
   endContent?: React.ReactNode;
@@ -29,7 +29,7 @@ const Navbar = ({
           onPress={() => router.back()}
           className="text-inherit"
         >
-          <ArrowLeftIcon className="size-5" />
+          <ArrowLeft weight="Linear" className="size-5" />
         </Button>
         {!hideTitle && <h1 className="font-semibold me-auto">{title}</h1>}
         {endContent}

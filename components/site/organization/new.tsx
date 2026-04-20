@@ -14,23 +14,18 @@ import {
   Alert,
   addToast,
 } from "@heroui/react";
-import {
-  SparklesIcon,
-  CameraIcon,
-  PhoneIcon,
-  Share2Icon,
-  SaveIcon,
-  UploadIcon,
-} from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import Navbar from "../navbar";
 import {
-  BuildingIcon,
-  FacebookIcon,
-  InstagramIcon,
-  TwitterXIcon,
-  WhatsappIcon,
-} from "@/components/icons";
+  GalleryAdd,
+  Phone,
+  Plain,
+  Share,
+  UploadMinimalistic,
+  UsersGroupTwoRounded,
+  VolumeLoud,
+} from "@solar-icons/react";
+import { FacebookIcon, InstagramIcon, TwitterXIcon } from "@/components/icons";
 
 const NewOrganization = () => {
   const router = useRouter();
@@ -54,7 +49,7 @@ const NewOrganization = () => {
   const logoInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -138,7 +133,7 @@ const NewOrganization = () => {
             (err: { path: string[]; message: string }) => {
               const field = err.path[0];
               fieldErrors[field] = err.message;
-            }
+            },
           );
           setErrors(fieldErrors);
         } else {
@@ -181,7 +176,7 @@ const NewOrganization = () => {
               "Saving..."
             ) : (
               <>
-                <SaveIcon className="size-3.5" />
+                <Plain weight="Broken" className="size-3.5" />
                 Save
               </>
             )}
@@ -220,7 +215,12 @@ const NewOrganization = () => {
                   color="primary"
                   src={image.previewUrl}
                   className="size-28 border-2 border-primary/30 bg-background"
-                  icon={<CameraIcon className="size-12 text-primary/60" />}
+                  icon={
+                    <GalleryAdd
+                      weight="Broken"
+                      className="size-12 text-primary/60"
+                    />
+                  }
                 />
                 <div className="flex-1 w-full">
                   <h3 className="text-sm font-semibold text-foreground mb-2">
@@ -234,7 +234,7 @@ const NewOrganization = () => {
                     fullWidth
                     radius="md"
                   >
-                    <UploadIcon className="size-3.5" />
+                    <UploadMinimalistic weight="Broken" className="size-3.5" />
                     Upload Image
                   </Button>
                   <p className="text-xs text-muted mt-2">
@@ -255,7 +255,10 @@ const NewOrganization = () => {
           <Card className="" shadow="sm" fullWidth>
             <CardBody className="p-6 space-y-4">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <BuildingIcon className="size-5 text-primary" />
+                <UsersGroupTwoRounded
+                  weight="Broken"
+                  className="size-5 text-primary"
+                />
                 Basic Information
               </h3>
               <Divider />
@@ -275,7 +278,10 @@ const NewOrganization = () => {
                 isInvalid={!!errors.name}
                 errorMessage={errors.name}
                 startContent={
-                  <BuildingIcon className="size-4 text-muted me-1" />
+                  <UsersGroupTwoRounded
+                    weight="Broken"
+                    className="size-4 text-muted me-1"
+                  />
                 }
               />
 
@@ -292,7 +298,10 @@ const NewOrganization = () => {
                 isInvalid={!!errors.tagline}
                 errorMessage={errors.tagline}
                 startContent={
-                  <SparklesIcon className="size-4 text-muted me-1" />
+                  <VolumeLoud
+                    weight="Broken"
+                    className="size-4 text-muted me-1"
+                  />
                 }
               />
             </CardBody>
@@ -301,7 +310,7 @@ const NewOrganization = () => {
           <Card shadow="sm" fullWidth>
             <CardBody className="p-6 space-y-4">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <PhoneIcon className="size-5 text-primary" />
+                <Phone weight="Broken" className="size-5 text-primary" />
                 Contact Information
               </h3>
               <Divider />
@@ -319,7 +328,7 @@ const NewOrganization = () => {
                 isInvalid={!!errors.phone}
                 errorMessage={errors.phone}
                 startContent={
-                  <WhatsappIcon className="size-4 text-muted me-1" />
+                  <Phone weight="Broken" className="size-4 text-muted me-1" />
                 }
               />
             </CardBody>
@@ -328,7 +337,7 @@ const NewOrganization = () => {
           <Card shadow="sm" fullWidth>
             <CardBody className="p-6 space-y-4">
               <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <Share2Icon className="size-5 text-primary" />
+                <Share weight="Bold" className="size-5 text-primary" />
                 Social Media
               </h3>
               <Divider />

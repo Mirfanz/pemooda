@@ -12,18 +12,19 @@ import {
   DrawerHeader,
   Input,
 } from "@heroui/react";
-import { CalendarIcon, PlusIcon, Settings2Icon } from "lucide-react";
-import { Activity, ActivityStatus } from "@/types";
-import { SearchIcon } from "@/components/icons";
+import { Activity } from "@/types";
 import { useActivities } from "@/hooks/queries/activity";
 import Link from "next/link";
 import ActivityCard from "./activity-card";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  CalendarAdd,
+  CalendarSearch,
+  Magnifier,
+  Tuning2,
+} from "@solar-icons/react";
 
 const ActivityMain = () => {
-  const [selectedStatus, setSelectedStatus] = useState<ActivityStatus | "all">(
-    "all",
-  );
   const [isPublic, setIsPublic] = useState(false);
   const [search, setSearch] = useState("");
   const [filterOpen, setFilterOpen] = useState(false);
@@ -61,7 +62,7 @@ const ActivityMain = () => {
             as={Link}
             href="/activity/new"
           >
-            <PlusIcon className="size-6" />
+            <CalendarAdd weight="Broken" className="size-6" />
           </Button>
         </div>
       </div>
@@ -69,7 +70,7 @@ const ActivityMain = () => {
       <div className="flex p-4 rounded-b-3xl sticky top-0 z-50 gap-2 bg-primary">
         <Input
           type="search"
-          startContent={<SearchIcon className="size-4 me-1" />}
+          startContent={<Magnifier weight="Broken" className="size-5 me-1" />}
           placeholder="Cari sesuatu disini"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -80,7 +81,7 @@ const ActivityMain = () => {
           isIconOnly
           onPress={() => setFilterOpen((prev) => !prev)}
         >
-          <Settings2Icon className="size-5" />
+          <Tuning2 weight="Broken" className="size-5" />
         </Button>
       </div>
       {/* Body */}
@@ -94,7 +95,10 @@ const ActivityMain = () => {
         ) : activities.length === 0 ? (
           <Card className="shadow-sm">
             <CardBody className="text-center py-12">
-              <CalendarIcon className="size-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+              <CalendarSearch
+                weight="Broken"
+                className="size-12 mx-auto mb-3 text-muted-foreground opacity-50"
+              />
               <p className="text-muted-foreground">Tidak ada aktivitas</p>
             </CardBody>
           </Card>
@@ -120,7 +124,7 @@ const ActivityMain = () => {
           radius="lg"
           // className="animate-bounce"
         >
-          <PlusIcon className="size-6" />
+          <CalendarAdd weight="Broken" className="size-6" />
         </Button>
       </div>
       <Drawer

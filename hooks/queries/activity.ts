@@ -86,3 +86,15 @@ export function useDeleteActivity() {
     },
   });
 }
+
+export function useFinishActivity() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => axios.patch(`/api/activity/${id}/finish`),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: activityKeys.all });
+      queryClient.invalidateQueries({ queryKey: activityKeys.detail(id) });
+    },
+  });
+}

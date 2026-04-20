@@ -1,6 +1,10 @@
 "use client";
 
-import { useActivity, useDeleteActivity } from "@/hooks/queries/activity";
+import {
+  useActivity,
+  useDeleteActivity,
+  useFinishActivity,
+} from "@/hooks/queries/activity";
 import Navbar from "../navbar";
 import {
   Card,
@@ -8,16 +12,13 @@ import {
   CardHeader,
   Chip,
   Skeleton,
-  Divider,
-  Progress,
-  Avatar,
   Button,
   Dropdown,
   DropdownTrigger,
   DropdownMenu,
   DropdownItem,
 } from "@heroui/react";
-import { activityTypeEnum, attendeeStatusEnum } from "@/config/enums";
+import { activityTypeEnum } from "@/config/enums";
 import * as fns from "date-fns";
 import { id } from "date-fns/locale";
 import {
@@ -25,17 +26,15 @@ import {
   PenNewSquare,
   TrashBinTrash,
   CheckCircle,
-  CloseCircle,
-  MinusCircle,
-  DangerCircle,
   MenuDots,
   CalendarMark,
   MapPointWave,
   SquareTopDown,
   DocumentAdd,
-  UsersGroupRounded,
-  Wallet,
+  QrCode,
+  CheckRead,
 } from "@solar-icons/react";
+import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
 import { displayIntervalDate } from "@/lib/utils";
 import Countdown from "./countdown";
@@ -43,114 +42,43 @@ import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
+import { useState, useMemo } from "react";
 
 type Props = {
   activityId: string;
 };
 
-// Dummy data for attendance
-const dummyAttendance = [
-  { id: "1", name: "Ahmad Fauzi", avatarUrl: null, status: "PRESENT" as const },
-  {
-    id: "2",
-    name: "Siti Nurhaliza",
-    avatarUrl: null,
-    status: "PRESENT" as const,
-  },
-  { id: "3", name: "Budi Santoso", avatarUrl: null, status: "EXCUSE" as const },
-  {
-    id: "4",
-    name: "Dewi Lestari",
-    avatarUrl: null,
-    status: "PRESENT" as const,
-  },
-  { id: "5", name: "Eko Prasetyo", avatarUrl: null, status: "ABSENT" as const },
-  {
-    id: "6",
-    name: "Fitri Handayani",
-    avatarUrl: null,
-    status: "PRESENT" as const,
-  },
-  {
-    id: "7",
-    name: "Gunawan Wijaya",
-    avatarUrl: null,
-    status: "PENDING" as const,
-  },
-  { id: "8", name: "Hani Kusuma", avatarUrl: null, status: "PRESENT" as const },
-];
-
-// Dummy data for budget
-const dummyBudget = {
-  total: 5000000,
-  expenses: [
-    {
-      id: "1",
-      category: "Konsumsi",
-      amount: 1500000,
-      description: "Snack dan makan siang peserta",
-    },
-    {
-      id: "2",
-      category: "Transportasi",
-      amount: 800000,
-      description: "Sewa bus dan BBM",
-    },
-    {
-      id: "3",
-      category: "Perlengkapan",
-      amount: 600000,
-      description: "Spanduk, banner, dan ATK",
-    },
-    {
-      id: "4",
-      category: "Dokumentasi",
-      amount: 400000,
-      description: "Fotografer dan videografer",
-    },
-    {
-      id: "5",
-      category: "Lain-lain",
-      amount: 200000,
-      description: "Biaya tak terduga",
-    },
-  ],
-};
-
-const getStatusIcon = (status: string) => {
-  switch (status) {
-    case "PRESENT":
-      return <CheckCircle weight="Broken" className="w-4 h-4 text-success" />;
-    case "ABSENT":
-      return <CloseCircle weight="Broken" className="w-4 h-4 text-danger" />;
-    case "EXCUSE":
-      return <DangerCircle weight="Broken" className="w-4 h-4 text-warning" />;
-    default:
-      return (
-        <MinusCircle weight="Broken" className="w-4 h-4 text-default-400" />
-      );
-  }
-};
+type ActivityStatus = "soon" | "ongoing" | "ended";
 
 const Detail = ({ activityId }: Props) => {
   const { isLoading, data: activity } = useActivity(activityId);
   const auth = useAuth();
   const router = useRouter();
   const deleteActivity = useDeleteActivity();
+  const finishActivity = useFinishActivity();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const totalExpenses = dummyBudget.expenses.reduce(
-    (sum, exp) => sum + exp.amount,
-    0,
-  );
-  const remaining = dummyBudget.total - totalExpenses;
-  const budgetUsedPercentage = (totalExpenses / dummyBudget.total) * 100;
+  // Calculate activity status
+  const activityStatus = useMemo<ActivityStatus>(() => {
+    if (!activity) return "soon";
 
-  const attendanceStats = {
-    present: dummyAttendance.filter((a) => a.status === "PRESENT").length,
-    absent: dummyAttendance.filter((a) => a.status === "ABSENT").length,
-    excuse: dummyAttendance.filter((a) => a.status === "EXCUSE").length,
-    pending: dummyAttendance.filter((a) => a.status === "PENDING").length,
-    total: dummyAttendance.length,
+    const now = new Date();
+    const startDate = new Date(activity.startDate);
+    const endDate = activity.endDate ? new Date(activity.endDate) : null;
+
+    if (endDate && now > endDate) {
+      return "ended";
+    } else if (now >= startDate && !endDate) {
+      return "ongoing";
+    } else {
+      return "soon";
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activity, refreshTrigger]); // refreshTrigger forces recalculation
+
+  // Function to refresh activity status
+  const refreshStatus = () => {
+    setRefreshTrigger((prev) => prev + 1);
   };
 
   const handleShare = async () => {
@@ -176,9 +104,9 @@ const Detail = ({ activityId }: Props) => {
           showConfirmButton: false,
         });
       }
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error sharing:", error);
+    } catch (err) {
+      if (err instanceof Error) {
+        console.error("Error sharing:", err);
       }
     }
   };
@@ -206,11 +134,46 @@ const Detail = ({ activityId }: Props) => {
           showConfirmButton: false,
         });
         router.push("/activity");
-      } catch (error) {
+      } catch {
         Swal.fire({
           icon: "error",
           title: "Gagal!",
           text: "Terjadi kesalahan saat menghapus kegiatan",
+        });
+      }
+    }
+  };
+
+  const handleFinishActivity = async () => {
+    const result = await Swal.fire({
+      title: "Selesaikan Kegiatan?",
+      text: "Kegiatan akan ditandai sebagai selesai",
+      icon: "question",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Ya, Selesaikan!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await finishActivity.mutateAsync(activityId);
+        // Status will be automatically refreshed when activity data is refetched
+        Swal.fire({
+          icon: "success",
+          title: "Selesai!",
+          text: "Kegiatan berhasil diselesaikan",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Terjadi kesalahan";
+        Swal.fire({
+          icon: "error",
+          title: "Gagal!",
+          text: errorMessage,
         });
       }
     }
@@ -245,6 +208,9 @@ const Detail = ({ activityId }: Props) => {
   }
 
   const ActivityIcon = activityTypeEnum[activity.type].icon;
+
+  // Generate QR code URL for attendance
+  const attendanceUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/activity/${activityId}/attendance`;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -427,187 +393,127 @@ const Detail = ({ activityId }: Props) => {
           </Card>
         </section>
 
-        <section className="px-4">
-          <Countdown targetDate={activity.startDate} />
-        </section>
+        {activityStatus === "soon" && (
+          <section className="px-4">
+            <Countdown
+              targetDate={activity.startDate}
+              onEnded={refreshStatus}
+            />
+          </section>
+        )}
 
-        {/* Attendance */}
-        <section className="px-4">
-          <Card className="shadow-md " fullWidth>
-            <CardHeader className="pb-2 px-4 pt-4">
-              <div className="flex items-center justify-between w-full">
+        {/* Ongoing Activity Status */}
+        {activityStatus === "ongoing" && (
+          <section className="px-4">
+            <Card className="shadow-md bg-linear-to-r from-success-50 to-primary-50 dark:from-success-900/20 dark:to-primary-900/20 border-2 border-success">
+              <CardBody className="p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-success rounded-full animate-ping opacity-75" />
+                      <div className="relative bg-success rounded-full p-2">
+                        <CheckRead
+                          weight="Bold"
+                          className="w-5 h-5 text-white"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-success-700 dark:text-success-400">
+                        Kegiatan Sedang Berlangsung
+                      </h3>
+                      <p className="text-xs text-success-600 dark:text-success-500">
+                        Jangan lupa absen!
+                      </p>
+                    </div>
+                  </div>
+                  {auth.hasRole([Role.KETUA, Role.SEKRETARIS]) && (
+                    <Button
+                      size="sm"
+                      color="success"
+                      variant="flat"
+                      startContent={
+                        <CheckCircle weight="Bold" className="size-4" />
+                      }
+                      onPress={handleFinishActivity}
+                    >
+                      Selesaikan
+                    </Button>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+          </section>
+        )}
+
+        {/* QR Code for Attendance */}
+        {activityStatus === "ongoing" && (
+          <section className="px-4">
+            <Card className="shadow-md">
+              <CardHeader className="pb-2 px-4 pt-4">
                 <div className="flex items-center gap-2">
-                  <UsersGroupRounded
+                  <QrCode
                     weight="BoldDuotone"
                     className="w-5 h-5 text-primary"
                   />
-                  <h2 className="text-lg font-bold">Kehadiran</h2>
+                  <h2 className="text-lg font-bold">QR Code Absensi</h2>
                 </div>
-                <Chip size="sm" variant="flat" color="primary">
-                  {attendanceStats.present}/{attendanceStats.total}
-                </Chip>
-              </div>
-            </CardHeader>
-            <CardBody className="px-4 pb-4 space-y-4">
-              {/* Attendance Stats */}
-              <div className="grid grid-cols-4 gap-2">
-                <div className="text-center p-2 bg-success-50 dark:bg-success-900/20 rounded-lg">
-                  <p className="text-lg font-bold text-success">
-                    {attendanceStats.present}
-                  </p>
-                  <p className="text-xs text-success-600 dark:text-success-400">
-                    Hadir
-                  </p>
+              </CardHeader>
+              <CardBody className="px-4 pb-4 flex flex-col items-center gap-3">
+                <div className="bg-white p-4 rounded-lg">
+                  <QRCodeSVG value={attendanceUrl} size={200} level="M" />
                 </div>
-                <div className="text-center p-2 bg-warning-50 dark:bg-warning-900/20 rounded-lg">
-                  <p className="text-lg font-bold text-warning">
-                    {attendanceStats.excuse}
-                  </p>
-                  <p className="text-xs text-warning-600 dark:text-warning-400">
-                    Izin
-                  </p>
-                </div>
-                <div className="text-center p-2 bg-danger-50 dark:bg-danger-900/20 rounded-lg">
-                  <p className="text-lg font-bold text-danger">
-                    {attendanceStats.absent}
-                  </p>
-                  <p className="text-xs text-danger-600 dark:text-danger-400">
-                    Alfa
-                  </p>
-                </div>
-                <div className="text-center p-2 bg-default-100 dark:bg-default-900/20 rounded-lg">
-                  <p className="text-lg font-bold text-default-600">
-                    {attendanceStats.pending}
-                  </p>
-                  <p className="text-xs text-default-500">Belum</p>
-                </div>
-              </div>
-
-              <Divider />
-
-              {/* Attendance List */}
-              <div className="space-y-2">
-                {dummyAttendance.map((attendee) => (
-                  <div
-                    key={attendee.id}
-                    className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-default-100 transition-colors"
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <Avatar
-                        size="sm"
-                        name={attendee.name}
-                        src={attendee.avatarUrl || undefined}
-                        className="shrink-0"
-                      />
-                      <p className="text-sm font-medium text-foreground truncate">
-                        {attendee.name}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {getStatusIcon(attendee.status)}
-                      <span className="text-xs text-default-500">
-                        {attendeeStatusEnum[attendee.status].label}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-        </section>
-
-        {/* Budget */}
-        <section className="px-4">
-          <Card className="shadow-md " fullWidth>
-            <CardHeader className="pb-2 px-4 pt-4">
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                  <Wallet
-                    weight="BoldDuotone"
-                    className="w-5 h-5 text-success"
-                  />
-                  <h2 className="text-lg font-bold">Anggaran</h2>
-                </div>
-              </div>
-            </CardHeader>
-            <CardBody className="px-4 pb-4 space-y-4">
-              {/* Budget Overview */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-default-600">
-                    Total Anggaran
-                  </span>
-                  <span className="text-sm font-bold text-foreground">
-                    Rp {dummyBudget.total.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-default-600">
-                    Total Pengeluaran
-                  </span>
-                  <span className="text-sm font-bold text-danger">
-                    Rp {totalExpenses.toLocaleString("id-ID")}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-default-600">
-                    Sisa Anggaran
-                  </span>
-                  <span
-                    className={`text-sm font-bold ${remaining >= 0 ? "text-success" : "text-danger"}`}
-                  >
-                    Rp {remaining.toLocaleString("id-ID")}
-                  </span>
-                </div>
-
-                <Progress
-                  size="sm"
-                  value={budgetUsedPercentage}
-                  color={
-                    budgetUsedPercentage > 90
-                      ? "danger"
-                      : budgetUsedPercentage > 70
-                        ? "warning"
-                        : "success"
-                  }
-                  className="mt-2"
-                />
                 <p className="text-xs text-center text-default-500">
-                  {budgetUsedPercentage.toFixed(1)}% terpakai
+                  Scan QR code ini untuk melakukan absensi
                 </p>
-              </div>
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="primary"
+                  fullWidth
+                  as={Link}
+                  href={attendanceUrl}
+                >
+                  Buka Link Absensi
+                </Button>
+              </CardBody>
+            </Card>
+          </section>
+        )}
 
-              <Divider />
-
-              {/* Expense List */}
-              <div className="space-y-3">
-                <h3 className="text-sm font-semibold text-foreground">
-                  Rincian Pengeluaran
-                </h3>
-                {dummyBudget.expenses.map((expense) => (
-                  <div
-                    key={expense.id}
-                    className="space-y-1 p-3 bg-default-50 dark:bg-default-900/20 rounded-lg"
-                  >
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground">
-                          {expense.category}
-                        </p>
-                        <p className="text-xs text-default-500 mt-0.5">
-                          {expense.description}
-                        </p>
-                      </div>
-                      <p className="text-sm font-bold text-danger shrink-0">
-                        Rp {expense.amount.toLocaleString("id-ID")}
-                      </p>
-                    </div>
+        {/* Finished Activity Status */}
+        {activityStatus === "ended" && activity.endDate && (
+          <section className="px-4">
+            <Card className="shadow-md bg-linear-to-r from-default-100 to-default-50 dark:from-default-900/20 dark:to-default-800/20">
+              <CardBody className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="bg-default-200 dark:bg-default-700 rounded-full p-2">
+                    <CheckCircle
+                      weight="Bold"
+                      className="w-5 h-5 text-default-600 dark:text-default-400"
+                    />
                   </div>
-                ))}
-              </div>
-            </CardBody>
-          </Card>
-        </section>
+                  <div>
+                    <h3 className="text-lg font-bold text-default-700 dark:text-default-300">
+                      Kegiatan Telah Selesai
+                    </h3>
+                    <p className="text-xs text-default-500">
+                      Selesai pada{" "}
+                      {fns.format(
+                        new Date(activity.endDate),
+                        "dd MMMM yyyy, HH:mm",
+                        {
+                          locale: id,
+                        },
+                      )}{" "}
+                      WIB
+                    </p>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </section>
+        )}
       </main>
     </div>
   );

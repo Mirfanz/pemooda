@@ -169,7 +169,7 @@ const AnnouncementMain = () => {
               <CardBody className="p-4">
                 <div className="flex gap-3">
                   <div
-                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconColor(
+                    className={`shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${getIconColor(
                       notif.type,
                     )}`}
                   >

@@ -32,7 +32,7 @@ import {
   SquareTopDown,
   DocumentAdd,
   QrCode,
-  CheckRead,
+  ClockCircle,
 } from "@solar-icons/react";
 import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
@@ -42,44 +42,32 @@ import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useMemo } from "react";
 
 type Props = {
   activityId: string;
 };
 
-type ActivityStatus = "soon" | "ongoing" | "ended";
+type ActivityStatus = "upcoming" | "ongoing" | "ended";
 
 const Detail = ({ activityId }: Props) => {
-  const { isLoading, data: activity } = useActivity(activityId);
+  const { isLoading, data: activity, refetch } = useActivity(activityId);
   const auth = useAuth();
   const router = useRouter();
   const deleteActivity = useDeleteActivity();
   const finishActivity = useFinishActivity();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Calculate activity status
-  const activityStatus = useMemo<ActivityStatus>(() => {
-    if (!activity) return "soon";
+  const activityStatus = useMemo<ActivityStatus | undefined>(() => {
+    if (!activity) return undefined;
 
     const now = new Date();
     const startDate = new Date(activity.startDate);
     const endDate = activity.endDate ? new Date(activity.endDate) : null;
 
-    if (endDate && now > endDate) {
-      return "ended";
-    } else if (now >= startDate && !endDate) {
-      return "ongoing";
-    } else {
-      return "soon";
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity, refreshTrigger]); // refreshTrigger forces recalculation
-
-  // Function to refresh activity status
-  const refreshStatus = () => {
-    setRefreshTrigger((prev) => prev + 1);
-  };
+    if (now < startDate) return "upcoming";
+    else if (endDate && now >= endDate) return "ended";
+    else return "ongoing";
+  }, [activity]);
 
   const handleShare = async () => {
     const shareData = {
@@ -208,9 +196,6 @@ const Detail = ({ activityId }: Props) => {
   }
 
   const ActivityIcon = activityTypeEnum[activity.type].icon;
-
-  // Generate QR code URL for attendance
-  const attendanceUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/activity/${activityId}/attendance`;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -393,58 +378,93 @@ const Detail = ({ activityId }: Props) => {
           </Card>
         </section>
 
-        {activityStatus === "soon" && (
+        {activityStatus === "upcoming" && (
           <section className="px-4">
-            <Countdown
-              targetDate={activity.startDate}
-              onEnded={refreshStatus}
-            />
-          </section>
-        )}
-
-        {/* Ongoing Activity Status */}
-        {activityStatus === "ongoing" && (
-          <section className="px-4">
-            <Card className="shadow-md bg-linear-to-r from-success-50 to-primary-50 dark:from-success-900/20 dark:to-primary-900/20 border-2 border-success">
+            <Card className="bg-linear-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800 shadow-lg">
               <CardBody className="p-4">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-success rounded-full animate-ping opacity-75" />
-                      <div className="relative bg-success rounded-full p-2">
-                        <CheckRead
-                          weight="Bold"
-                          className="w-5 h-5 text-white"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-success-700 dark:text-success-400">
-                        Kegiatan Sedang Berlangsung
-                      </h3>
-                      <p className="text-xs text-success-600 dark:text-success-500">
-                        Jangan lupa absen!
-                      </p>
-                    </div>
-                  </div>
-                  {auth.hasRole([Role.KETUA, Role.SEKRETARIS]) && (
-                    <Button
-                      size="sm"
-                      color="success"
-                      variant="flat"
-                      startContent={
-                        <CheckCircle weight="Bold" className="size-4" />
-                      }
-                      onPress={handleFinishActivity}
-                    >
-                      Selesaikan
-                    </Button>
-                  )}
+                <div className="flex items-center gap-2 mb-3">
+                  <ClockCircle
+                    weight="Broken"
+                    className="w-5 h-5 text-primary"
+                  />
+                  <h3 className="text-sm font-semibold text-primary">
+                    Acara akan dimulai :
+                  </h3>
                 </div>
+                <Countdown
+                  targetDate={activity.startDate}
+                  className="text-primary"
+                />
               </CardBody>
             </Card>
           </section>
         )}
+
+        {/* Ongoing Activity Status */}
+        {activityStatus === "ongoing" &&
+          (activity.endDate ? (
+            <section className="px-4">
+              <Card className="bg-linear-to-br from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-2 border-success-200 dark:border-success-800 shadow-lg">
+                {/* <Card className="bg-linear-to-br from-success-50 to-success-50 dark:from-success-900/20 dark:to-success-900/20 border-2 border-success"> */}
+                <CardBody className="p-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <ClockCircle
+                      weight="Broken"
+                      className="w-5 h-5 text-success"
+                    />
+                    <h3 className="text-sm font-semibold text-success">
+                      Akan selesai pada :
+                    </h3>
+                  </div>
+                  <Countdown
+                    targetDate={activity.endDate}
+                    className="text-success"
+                  />
+                </CardBody>
+              </Card>
+            </section>
+          ) : (
+            <section className="px-4">
+              <Card className="bg-linear-to-br from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-2 border-success-200 dark:border-success-800 shadow-lg">
+                <CardBody className="p-4">
+                  <div className="flex flex-col justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-success rounded-full animate-ping opacity-75" />
+                        <div className="relative bg-success rounded-full p-2">
+                          <ClockCircle
+                            weight="Broken"
+                            className="size-5 text-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-success-700 dark:text-success-400">
+                          Sedang Berlangsung
+                        </h3>
+                        <p className="text-xs text-success-600 dark:text-success-500">
+                          Jangan lupa absen!
+                        </p>
+                      </div>
+                    </div>
+                    {auth.hasRole([Role.KETUA, Role.SEKRETARIS]) && (
+                      <Button
+                        size="sm"
+                        color="success"
+                        // variant="flat"
+                        startContent={
+                          <CheckCircle weight="Broken" className="size-4" />
+                        }
+                        onPress={handleFinishActivity}
+                      >
+                        Finish Activity
+                      </Button>
+                    )}
+                  </div>
+                </CardBody>
+              </Card>
+            </section>
+          ))}
 
         {/* QR Code for Attendance */}
         {activityStatus === "ongoing" && (
@@ -461,19 +481,12 @@ const Detail = ({ activityId }: Props) => {
               </CardHeader>
               <CardBody className="px-4 pb-4 flex flex-col items-center gap-3">
                 <div className="bg-white p-4 rounded-lg">
-                  <QRCodeSVG value={attendanceUrl} size={200} level="M" />
+                  <QRCodeSVG value={"attendanceId"} size={200} level="M" />
                 </div>
                 <p className="text-xs text-center text-default-500">
                   Scan QR code ini untuk melakukan absensi
                 </p>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="primary"
-                  fullWidth
-                  as={Link}
-                  href={attendanceUrl}
-                >
+                <Button size="sm" variant="flat" color="primary" fullWidth>
                   Buka Link Absensi
                 </Button>
               </CardBody>

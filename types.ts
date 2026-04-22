@@ -92,3 +92,5 @@ export type Color =
   | "warning"
   | "danger"
   | undefined;
+
+export type TimeStatus = "upcoming" | "ongoing" | "ended";

@@ -18,7 +18,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "@heroui/react";
-import { activityTypeEnum } from "@/config/enums";
+import { activityTypeEnum, timeStatusEnum } from "@/config/enums";
 import * as fns from "date-fns";
 import { id } from "date-fns/locale";
 import {
@@ -36,38 +36,38 @@ import {
 } from "@solar-icons/react";
 import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
-import { displayIntervalDate } from "@/lib/utils";
+import { displayIntervalDate, getTimeStatus } from "@/lib/utils";
 import Countdown from "./countdown";
 import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useState } from "react";
+import { TimeStatus } from "@/types";
 
 type Props = {
   activityId: string;
 };
 
-type ActivityStatus = "upcoming" | "ongoing" | "ended";
-
 const Detail = ({ activityId }: Props) => {
-  const { isLoading, data: activity, refetch } = useActivity(activityId);
+  const { isLoading, data: activity } = useActivity(activityId);
   const auth = useAuth();
   const router = useRouter();
   const deleteActivity = useDeleteActivity();
   const finishActivity = useFinishActivity();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const activityStatus = useMemo<ActivityStatus | undefined>(() => {
-    if (!activity) return undefined;
+  const activityStatus: TimeStatus | undefined = activity
+    ? getTimeStatus(activity.startDate, activity.endDate)
+    : undefined;
 
-    const now = new Date();
-    const startDate = new Date(activity.startDate);
-    const endDate = activity.endDate ? new Date(activity.endDate) : null;
+  const activityColor = activityStatus
+    ? timeStatusEnum[activityStatus].color
+    : "default";
 
-    if (now < startDate) return "upcoming";
-    else if (endDate && now >= endDate) return "ended";
-    else return "ongoing";
-  }, [activity]);
+  const handleCountdownEnded = () => {
+    setRefreshTrigger((prev) => prev + 1);
+  };
 
   const handleShare = async () => {
     const shareData = {
@@ -254,13 +254,10 @@ const Detail = ({ activityId }: Props) => {
         <section className="px-4 mt-4">
           <div className="">
             <div className="flex items-center gap-2 flex-wrap mb-2">
-              <Chip
-                size="sm"
-                variant="dot"
-                radius="sm"
-                color={activity.endDate ? "default" : "warning"}
-              >
-                {displayIntervalDate(activity.startDate)}
+              <Chip size="sm" color={activityColor} variant="flat" radius="sm">
+                {activityStatus === "ongoing"
+                  ? timeStatusEnum.ongoing.label
+                  : displayIntervalDate(activity.startDate)}
               </Chip>
               <Chip
                 size="sm"
@@ -382,19 +379,32 @@ const Detail = ({ activityId }: Props) => {
           <section className="px-4">
             <Card className="bg-linear-to-br from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-800/20 border-2 border-primary-200 dark:border-primary-800 shadow-lg">
               <CardBody className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <ClockCircle
-                    weight="Broken"
-                    className="w-5 h-5 text-primary"
+                <div className="flex flex-col justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      {/* <div className="absolute inset-0 bg-primary rounded-full animate-bounce opacity-75" /> */}
+                      <div className="relative bg-primary rounded-full p-2">
+                        <ClockCircle
+                          weight="Broken"
+                          className="size-5 text-white"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-primary-700 dark:text-primary-400">
+                        Segera Dimulai
+                      </h3>
+                      <p className="text-xs text-primary-600 dark:text-primary-500">
+                        Hitung mundur acara dimulai.
+                      </p>
+                    </div>
+                  </div>
+                  <Countdown
+                    targetDate={activity.startDate}
+                    onEnded={handleCountdownEnded}
+                    className="text-primary"
                   />
-                  <h3 className="text-sm font-semibold text-primary">
-                    Acara akan dimulai :
-                  </h3>
                 </div>
-                <Countdown
-                  targetDate={activity.startDate}
-                  className="text-primary"
-                />
               </CardBody>
             </Card>
           </section>
@@ -405,21 +415,40 @@ const Detail = ({ activityId }: Props) => {
           (activity.endDate ? (
             <section className="px-4">
               <Card className="bg-linear-to-br from-success-50 to-success-100 dark:from-success-900/20 dark:to-success-800/20 border-2 border-success-200 dark:border-success-800 shadow-lg">
-                {/* <Card className="bg-linear-to-br from-success-50 to-success-50 dark:from-success-900/20 dark:to-success-900/20 border-2 border-success"> */}
                 <CardBody className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <ClockCircle
-                      weight="Broken"
-                      className="w-5 h-5 text-success"
+                  <div className="flex flex-col justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-success rounded-full animate-ping opacity-75" />
+                        <div className="relative bg-success rounded-full p-2">
+                          <ClockCircle
+                            weight="Broken"
+                            className="size-5 text-white"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-success-700 dark:text-success-400">
+                          Sedang Berlangsung
+                        </h3>
+                        <p className="text-xs text-success-600 dark:text-success-500">
+                          Akan selesai pada{" "}
+                          {fns.format(
+                            new Date(activity.endDate),
+                            "dd MMMM yyyy, HH:mm",
+                            {
+                              locale: id,
+                            },
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                    <Countdown
+                      targetDate={activity.endDate}
+                      onEnded={handleCountdownEnded}
+                      className="text-success"
                     />
-                    <h3 className="text-sm font-semibold text-success">
-                      Akan selesai pada :
-                    </h3>
                   </div>
-                  <Countdown
-                    targetDate={activity.endDate}
-                    className="text-success"
-                  />
                 </CardBody>
               </Card>
             </section>
@@ -497,30 +526,33 @@ const Detail = ({ activityId }: Props) => {
         {/* Finished Activity Status */}
         {activityStatus === "ended" && activity.endDate && (
           <section className="px-4">
-            <Card className="shadow-md bg-linear-to-r from-default-100 to-default-50 dark:from-default-900/20 dark:to-default-800/20">
+            <Card className="bg-linear-to-br from-default-100 to-default-200 dark:from-default-900/20 dark:to-default-800/20 border-2 border-default-200 dark:border-default-800 shadow-lg">
               <CardBody className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="bg-default-200 dark:bg-default-700 rounded-full p-2">
-                    <CheckCircle
-                      weight="Bold"
-                      className="w-5 h-5 text-default-600 dark:text-default-400"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-default-700 dark:text-default-300">
-                      Kegiatan Telah Selesai
-                    </h3>
-                    <p className="text-xs text-default-500">
-                      Selesai pada{" "}
-                      {fns.format(
-                        new Date(activity.endDate),
-                        "dd MMMM yyyy, HH:mm",
-                        {
-                          locale: id,
-                        },
-                      )}{" "}
-                      WIB
-                    </p>
+                <div className="flex flex-col justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative">
+                      {/* <div className="absolute inset-0 bg-default rounded-full animate-ping opacity-75" /> */}
+                      <div className="relative bg-default-600 rounded-full p-2">
+                        <ClockCircle
+                          weight="Broken"
+                          className="size-5 text-white"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-default-700 dark:text-default-400">
+                        Acara Telah Selesai
+                      </h3>
+                      <p className="text-xs text-default-600 dark:text-default-500">
+                        Selesai pada{" "}
+                        {fns.format(
+                          new Date(activity.endDate),
+                          "dd MMMM yyyy, HH:mm",
+                          { locale: id },
+                        )}{" "}
+                        WIB
+                      </p>
+                    </div>
                   </div>
                 </div>
               </CardBody>

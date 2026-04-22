@@ -1,8 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import {
-  intervalToDuration,
-} from "date-fns";
+import { intervalToDuration } from "date-fns";
+import { TimeStatus } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -35,4 +34,18 @@ export function displayIntervalDate(date: Date | string): string | null {
   if (timeLeft.minutes)
     return `${Math.abs(timeLeft.minutes)} menit ${timeLeft.minutes < 0 ? "lalu" : "lagi"}`;
   return null;
+}
+
+export function getTimeStatus(
+  start?: Date | string | null,
+  end?: Date | string | null,
+): TimeStatus {
+  if (!start) return "upcoming";
+  const now = new Date();
+  const startDate = new Date(start);
+  const endDate = end ? new Date(end) : null;
+
+  if (now < startDate) return "upcoming";
+  else if (endDate && now >= endDate) return "ended";
+  else return "ongoing";
 }

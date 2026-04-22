@@ -29,16 +29,14 @@ const Countdown = ({ targetDate, onEnded, className, ...divProps }: Props) => {
       );
       if (isPast && !hasCalledOnEnded.current) {
         hasCalledOnEnded.current = true;
-        onEnded?.();
+        setTimeout(() => {
+          onEnded?.();
+        }, 1000);
       }
     }, 1000);
 
     return () => clearInterval(interval);
   }, [targetDate, onEnded]);
-
-  // Check if event has passed or too far in future
-  const isPast = Object.values(duration).every((val) => !val || val <= 0);
-  if (isPast || duration.years || duration.months) return null;
 
   const timeUnits = [
     { value: duration.days || 0, label: "Hari" },

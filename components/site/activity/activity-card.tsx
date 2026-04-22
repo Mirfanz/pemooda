@@ -1,17 +1,12 @@
 "use client";
 
-import { activityTypeEnum } from "@/config/enums";
+import { activityTypeEnum, timeStatusEnum } from "@/config/enums";
 import type { Activity } from "@/types";
 import { Card, CardBody, Chip, Divider, User } from "@heroui/react";
-import React from "react";
 import dayjs from "dayjs";
 import Link from "next/link";
-import { displayIntervalDate } from "@/lib/utils";
-import {
-  CalendarMark,
-  ClockCircle,
-  MapPointWave,
-} from "@solar-icons/react";
+import { displayIntervalDate, getTimeStatus } from "@/lib/utils";
+import { CalendarMark, ClockCircle, MapPointWave } from "@solar-icons/react";
 
 type Props = {
   activity: Activity;
@@ -19,6 +14,8 @@ type Props = {
 
 const ActivityCard = ({ activity }: Props) => {
   const ActivityIcon = activityTypeEnum[activity.type].icon;
+  const activityStatus = getTimeStatus(activity.startDate, activity.endDate);
+  const activityColor = timeStatusEnum[activityStatus].color;
 
   return (
     <Card
@@ -38,11 +35,13 @@ const ActivityCard = ({ activity }: Props) => {
               <div className="flex items-center gap-2 mb-2">
                 <Chip
                   size="sm"
-                  color={activity.endDate ? "default" : "warning"}
-                  variant="dot"
+                  color={activityColor}
+                  variant="flat"
                   radius="sm"
                 >
-                  {displayIntervalDate(activity.startDate)}
+                  {activityStatus === "ongoing"
+                    ? timeStatusEnum.ongoing.label
+                    : displayIntervalDate(activity.startDate)}
                 </Chip>
                 <Chip
                   size="sm"

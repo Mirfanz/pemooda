@@ -3,7 +3,7 @@ import {
   AttendeeStatus,
   Role,
 } from "@/lib/generated/prisma/enums";
-import { Color, IconSvgProps } from "@/types";
+import { Color, IconSvgProps, TimeStatus } from "@/types";
 import { UsersGroupRounded } from "@solar-icons/react";
 
 import { FC } from "react";
@@ -34,4 +34,13 @@ export const activityTypeEnum: Record<
   TRAINING: { label: "Training", icon: UsersGroupRounded },
   VOLUNTEER: { label: "Volunteer", icon: UsersGroupRounded },
   OTHER: { label: "Lainnya", icon: UsersGroupRounded },
+};
+
+export const timeStatusEnum: Record<
+  TimeStatus,
+  { label: string; color: Color }
+> = {
+  upcoming: { label: "Segera", color: "warning" },
+  ongoing: { label: "Berlangsung", color: "success" },
+  ended: { label: "Selesai", color: "default" },
 };

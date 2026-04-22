@@ -35,6 +35,7 @@ const ActivityMain = () => {
     isLoading,
     hasNextPage,
     fetchNextPage,
+    isFetchingNextPage,
   } = useActivities({
     public: isPublic,
     search: search || undefined,
@@ -45,14 +46,15 @@ const ActivityMain = () => {
 
   return (
     <main className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className=" bg-primary p-4 pb-0">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl text-white font-bold mb-1">
               Event & Kegiatan
             </h1>
-            <p className="text-sm text-white/80">[0] event mendatang</p>
+            <p className="text-sm text-white/80">
+              {activities.length} event mendatang
+            </p>
           </div>
           <Button
             isIconOnly
@@ -108,7 +110,12 @@ const ActivityMain = () => {
           ))
         )}
         {hasNextPage && (
-          <Button onPress={() => fetchNextPage()} fullWidth variant="flat">
+          <Button
+            isLoading={isFetchingNextPage}
+            onPress={() => fetchNextPage()}
+            fullWidth
+            variant="flat"
+          >
             Load More
           </Button>
         )}

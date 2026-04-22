@@ -146,33 +146,44 @@ model Activity {
 }
 
 model Attendance {
-  id         String   @id @default(cuid())
-  activityId String   @map("activity_id")
-  isOpen     Boolean  @default(false) @map("is_open")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
+  id                 String    @id @default(cuid())
+  activityId         String    @map("activity_id")
+  name               String
+  description        String?
+  startDate          DateTime? @map("start_date")
+  endDate            DateTime? @map("end_date")
+  allowExternalUsers Boolean   @default(false) @map("allow_external_users")
+  totalPresent       Int       @default(0) @map("total_present")
+  totalAbsent        Int       @default(0) @map("total_absent")
+  totalExcuse        Int       @default(0) @map("total_excuse")
+  totalPending       Int       @default(0) @map("total_pending")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
 
   activity  Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
   attendees Attendee[]
 
-  @@unique([activityId])
   @@index([activityId])
   @@map("attendances")
 }
 
 model Attendee {
   id           String         @id @default(cuid())
-  userId       String         @map("user_id")
+  userId       String?        @map("user_id")
   attendanceId String         @map("attendance_id")
   status       AttendeeStatus @default(PENDING)
+  name         String?
+  email        String?        @db.Citext
+  attendedAt   DateTime?      @map("attended_at")
   createdAt    DateTime       @default(now()) @map("created_at")
   updatedAt    DateTime       @updatedAt @map("updated_at")
 
-  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   attendance Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
 
   @@unique([userId, attendanceId])
   @@index([attendanceId])
+  @@index([email])
   @@map("attendees")
 }
 

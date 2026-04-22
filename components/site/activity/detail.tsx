@@ -5,6 +5,7 @@ import {
   useDeleteActivity,
   useFinishActivity,
 } from "@/hooks/queries/activity";
+import { useAttendances } from "@/hooks/queries/attendance";
 import Navbar from "../navbar";
 import {
   Card,
@@ -31,7 +32,6 @@ import {
   SquareTopDown,
   DocumentAdd,
   ClockCircle,
-  AddSquare,
 } from "@solar-icons/react";
 import Link from "next/link";
 import { displayIntervalDate, getTimeStatus } from "@/lib/utils";
@@ -40,9 +40,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
 import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { TimeStatus } from "@/types";
-import { UsersGroupRounded } from "@solar-icons/react/ssr";
+import Attendances from "./attendances";
 
 type Props = {
   activityId: string;
@@ -50,11 +49,11 @@ type Props = {
 
 const Detail = ({ activityId }: Props) => {
   const { isLoading, data: activity } = useActivity(activityId);
+  const { data: attendances } = useAttendances(activityId);
   const auth = useAuth();
   const router = useRouter();
   const deleteActivity = useDeleteActivity();
   const finishActivity = useFinishActivity();
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const activityStatus: TimeStatus | undefined = activity
     ? getTimeStatus(activity.startDate, activity.endDate)
@@ -65,7 +64,7 @@ const Detail = ({ activityId }: Props) => {
     : "default";
 
   const handleCountdownEnded = () => {
-    setRefreshTrigger((prev) => prev + 1);
+    // Refresh activity data when countdown ends
   };
 
   const handleShare = async () => {
@@ -559,38 +558,11 @@ const Detail = ({ activityId }: Props) => {
         )}
 
         {/* Attendances */}
-        <section className="px-4">
-          <Card className="p-4 gap-3 shadow-md" fullWidth>
-            <div className="flex items-center justify-between w-full">
-              <div className="flex items-center gap-2">
-                <UsersGroupRounded
-                  weight="BoldDuotone"
-                  className="size-5 text-primary"
-                />
-                <h2 className="text-lg font-bold">Kehadiran</h2>
-              </div>
-              <Button size="sm" variant="flat" color="primary">
-                <AddSquare className="size-4" /> Add
-              </Button>
-            </div>
-            {activity.notes.length ? (
-              <ul className="space-y-1 list-item">
-                {[1, 2, 3, 4, 5].map((note, index) => (
-                  <li
-                    key={index}
-                    className="text-sm text-default-600 flex items-center gap-2"
-                  >
-                    <span className="text-primary ms-2">•</span>
-                    <span className="flex-1">{note}</span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-center text-muted text-sm p-2">
-                ~ Tidak ada catatan ~
-              </p>
-            )}
-          </Card>
+        <section className="px-4 pb-4">
+          <Attendances
+            activityId={activityId}
+            attendances={attendances || []}
+          />
         </section>
       </main>
     </div>

@@ -1,4 +1,8 @@
-import { ActivityType, Role } from "@/lib/generated/prisma/enums";
+import {
+  ActivityType,
+  AttendeeStatus,
+  Role,
+} from "@/lib/generated/prisma/enums";
 import { SVGProps } from "react";
 
 export type IconSvgProps = SVGProps<SVGSVGElement> & {
@@ -94,3 +98,48 @@ export type Color =
   | undefined;
 
 export type TimeStatus = "upcoming" | "ongoing" | "ended";
+
+export interface Attendance {
+  id: string;
+  activityId: string;
+  name: string;
+  description: string | null;
+  startDate: Date | string | null;
+  endDate: Date | string | null;
+  allowExternalUsers: boolean;
+  totalPresent: number;
+  totalAbsent: number;
+  totalExcuse: number;
+  totalPending: number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  _count?: {
+    attendees: number;
+  };
+  attendees?: Attendee[];
+  activity?: {
+    id: string;
+    title: string;
+  };
+}
+
+export interface Attendee {
+  id: string;
+  userId: string | null;
+  attendanceId: string;
+  status: AttendeeStatus;
+  name: string | null;
+  email: string | null;
+  attendedAt: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  user?: UserMinimal | null;
+}
+
+export interface AttendanceSummary {
+  total: number;
+  present: number;
+  absent: number;
+  excuse: number;
+  pending: number;
+}

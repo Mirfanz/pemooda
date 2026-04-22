@@ -1,5 +1,5 @@
-import ForgotPassword from "@/components/auth/forgot-password";
+import ChangePassword from "@/components/auth/change-password";
 
 export default async function ForgotPasswordPage() {
-  return <ForgotPassword />;
+  return <ChangePassword />;
 }

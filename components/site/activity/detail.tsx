@@ -9,7 +9,6 @@ import Navbar from "../navbar";
 import {
   Card,
   CardBody,
-  CardHeader,
   Chip,
   Skeleton,
   Button,
@@ -31,10 +30,9 @@ import {
   MapPointWave,
   SquareTopDown,
   DocumentAdd,
-  QrCode,
   ClockCircle,
+  AddSquare,
 } from "@solar-icons/react";
-import { QRCodeSVG } from "qrcode.react";
 import Link from "next/link";
 import { displayIntervalDate, getTimeStatus } from "@/lib/utils";
 import Countdown from "./countdown";
@@ -44,6 +42,7 @@ import Swal from "sweetalert2";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { TimeStatus } from "@/types";
+import { UsersGroupRounded } from "@solar-icons/react/ssr";
 
 type Props = {
   activityId: string;
@@ -410,7 +409,7 @@ const Detail = ({ activityId }: Props) => {
           </section>
         )}
 
-        {/* Ongoing Activity Status */}
+        {/* Ongoing */}
         {activityStatus === "ongoing" &&
           (activity.endDate ? (
             <section className="px-4">
@@ -495,8 +494,7 @@ const Detail = ({ activityId }: Props) => {
             </section>
           ))}
 
-        {/* QR Code for Attendance */}
-        {activityStatus === "ongoing" && (
+        {/* {activityStatus === "ongoing" && (
           <section className="px-4">
             <Card className="shadow-md">
               <CardHeader className="pb-2 px-4 pt-4">
@@ -521,9 +519,9 @@ const Detail = ({ activityId }: Props) => {
               </CardBody>
             </Card>
           </section>
-        )}
+        )} */}
 
-        {/* Finished Activity Status */}
+        {/* Ended */}
         {activityStatus === "ended" && activity.endDate && (
           <section className="px-4">
             <Card className="bg-linear-to-br from-default-100 to-default-200 dark:from-default-900/20 dark:to-default-800/20 border-2 border-default-200 dark:border-default-800 shadow-lg">
@@ -559,6 +557,41 @@ const Detail = ({ activityId }: Props) => {
             </Card>
           </section>
         )}
+
+        {/* Attendances */}
+        <section className="px-4">
+          <Card className="p-4 gap-3 shadow-md" fullWidth>
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2">
+                <UsersGroupRounded
+                  weight="BoldDuotone"
+                  className="size-5 text-primary"
+                />
+                <h2 className="text-lg font-bold">Kehadiran</h2>
+              </div>
+              <Button size="sm" variant="flat" color="primary">
+                <AddSquare className="size-4" /> Add
+              </Button>
+            </div>
+            {activity.notes.length ? (
+              <ul className="space-y-1 list-item">
+                {[1, 2, 3, 4, 5].map((note, index) => (
+                  <li
+                    key={index}
+                    className="text-sm text-default-600 flex items-center gap-2"
+                  >
+                    <span className="text-primary ms-2">•</span>
+                    <span className="flex-1">{note}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-muted text-sm p-2">
+                ~ Tidak ada catatan ~
+              </p>
+            )}
+          </Card>
+        </section>
       </main>
     </div>
   );

@@ -20,6 +20,7 @@ interface AuthContextType {
   hasRole: (role: Role | Role[], user?: User | null) => boolean;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  getEmail: () => Promise<string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,6 +43,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const getEmail = useCallback(async () => {
+    const response = await axios.get("/api/auth/me/email");
+    return response.data.data as string;
   }, []);
 
   const hasRole = useCallback(
@@ -80,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refreshUser,
         hasRole,
+        getEmail,
       }}
     >
       {children}

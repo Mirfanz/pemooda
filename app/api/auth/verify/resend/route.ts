@@ -15,7 +15,7 @@ export async function POST() {
           success: false,
           message: "Tidak terautentikasi",
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -30,7 +30,7 @@ export async function POST() {
           success: false,
           message: "User tidak ditemukan",
         },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST() {
           success: false,
           message: "Email sudah diverifikasi",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -73,13 +73,13 @@ export async function POST() {
     try {
       await sendEmailVerification(user.email, verificationToken);
     } catch (emailError) {
-      console.error("Gagal mengirim email verifikasi:", emailError);
+      console.log("Gagal mengirim email verifikasi:", emailError);
       return NextResponse.json(
         {
           success: false,
           message: "Gagal mengirim email verifikasi",
         },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -88,7 +88,7 @@ export async function POST() {
         success: true,
         message: "Email verifikasi berhasil dikirim ulang",
       },
-      { status: 200 }
+      { status: 200 },
     );
   } catch (error) {
     console.error("Error saat resend verifikasi:", error);
@@ -97,7 +97,7 @@ export async function POST() {
         success: false,
         message: "Terjadi kesalahan saat mengirim ulang verifikasi",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

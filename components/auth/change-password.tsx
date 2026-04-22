@@ -1,149 +1,104 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Form, Input } from "@heroui/react";
-import { Eye, EyeClosed, KeySquare2 } from "@solar-icons/react";
+
+import { useRouter } from "next/navigation";
+import {
+  ArrowLeft,
+  Key,
+  Letter,
+  LetterUnread,
+} from "@solar-icons/react";
+import { VerifiedCheck } from "@solar-icons/react/ssr";
+import { useAuth } from "@/contexts/auth-context";
 
 const ChangePassword = () => {
-  const [formData, setFormData] = useState({
-    password: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const [errors, setErrors] = useState<Record<string, string[] | null>>({});
+  const router = useRouter();
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const { user, getEmail } = useAuth();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: [] }));
-    }
-  };
+  useEffect(() => {
+    if (user) getEmail().then((email) => setEmail(email));
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isLoading) return;
 
     setIsLoading(true);
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
+      setIsSubmitted(true);
     } catch (error) {
-      console.error("Change password error:", error);
-      setErrors({ general: ["Terjadi kesalahan"] });
+      console.error("Forgot password error:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
+  if (isSubmitted) {
+    return (
+      <main className="">
+        <div className="flex flex-col mb-6">
+          <Button
+            className="rounded-3xl size-18 shadow-lg mb-4 shadow-success/40 animate-appearance-in"
+            color="success"
+            isIconOnly
+          >
+            <LetterUnread weight="Bold" className="size-10 text-white" />
+          </Button>
+          <h1 className="text-2xl font-bold mb-2 text-success flex items-center gap-1">
+            Link Sent <VerifiedCheck weight="Broken" className="size-6" />
+          </h1>
+          <p className="text-muted text-sm">
+            Please check your email for a link to reset your password.
+          </p>
+        </div>
+        <Button type="button" fullWidth variant="flat" onPress={router.back}>
+          <ArrowLeft weight="Linear" className="size-4" /> Go Back
+        </Button>
+      </main>
+    );
+  }
+
   return (
-    <main>
+    <main className="">
       <div className="flex flex-col mb-6">
         <Button
-          className="rounded-3xl size-18 shadow-lg mb-4 shadow-primary/40"
+          className="rounded-3xl size-18 shadow-lg mb-4 shadow-primary/40 animate-appearance-in"
           color="primary"
           isIconOnly
         >
-          <KeySquare2 weight="BoldDuotone" className="size-10" />
+          <Key weight="Broken" className="size-10" />
         </Button>
         <h1 className="text-2xl font-bold mb-2">Change Password</h1>
         <p className="text-muted text-sm">
-          Change your password to keep your account secure from attackers.
+          We will send you a recovery link to your email.
         </p>
       </div>
-      <Form onSubmit={handleSubmit} autoComplete="off" className="space-y-2">
+      <Form onSubmit={handleSubmit} autoComplete="off">
         <Input
-          variant="flat"
+          className="mb-4"
+          name="email"
+          value={email}
+          readOnly={!!user}
+          type="email"
+          onValueChange={(val) => setEmail(val)}
           isRequired
-          type={showNewPassword ? "text" : "password"}
-          classNames={{ helperWrapper: "pb-0!" }}
-          onInput={handleChange}
-          value={formData.newPassword}
-          name="newPassword"
-          label="New Password"
-          labelPlacement="outside-top"
-          placeholder="New password"
-          isInvalid={!!errors.newPassword?.length || undefined}
-          errorMessage={errors.newPassword?.[0]}
-          validate={(val) => {
-            if (val.length < 8) return "Password must be at least 8 characters";
-            if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(val))
-              return "Password must contain uppercase, lowercase, and number";
-            return true;
-          }}
-          endContent={
-            <Button
-              onPress={() => setShowNewPassword((prev) => !prev)}
-              className="-mr-2"
-              size="sm"
-              isIconOnly
-              type="button"
-              variant="light"
-            >
-              {showNewPassword ? (
-                <Eye weight="Broken" className="size-4" />
-              ) : (
-                <EyeClosed weight="Broken" className="size-4" />
-              )}
-            </Button>
-          }
+          placeholder="Your Email Address"
+          startContent={<Letter weight="Broken" className="size-5 mr-1" />}
         />
-
-        <Input
-          variant="flat"
-          isRequired
-          type={showConfirmPassword ? "text" : "password"}
-          classNames={{ helperWrapper: "pb-0!" }}
-          onInput={handleChange}
-          value={formData.confirmPassword}
-          name="confirmPassword"
-          label="Confirm Password"
-          labelPlacement="outside-top"
-          placeholder="Confirm new password"
-          validate={(val) => {
-            if (val != formData.newPassword) return "Password didn't match";
-            return true;
-          }}
-          endContent={
-            <Button
-              onPress={() => setShowConfirmPassword((prev) => !prev)}
-              className="-mr-2"
-              size="sm"
-              isIconOnly
-              type="button"
-              variant="light"
-            >
-              {showConfirmPassword ? (
-                <Eye weight="Broken" className="size-4" />
-              ) : (
-                <EyeClosed weight="Broken" className="size-4" />
-              )}
-            </Button>
-          }
-        />
-
-        {errors.general && (
-          <div className="text-sm text-danger bg-danger/10 p-3 rounded-lg">
-            {errors.general?.[0]}
-          </div>
-        )}
-
         <Button
-          type="submit"
-          className="mt-4"
-          variant="shadow"
+          className="shadow-lg mb-2"
           fullWidth
-          color="primary"
-          radius="full"
+          type="submit"
           isLoading={isLoading}
+          color="primary"
+          variant="shadow"
         >
-          {isLoading ? "Changing..." : "Change Password"}
+          {isLoading ? "Sending..." : "Send Reset Link"}
         </Button>
       </Form>
     </main>

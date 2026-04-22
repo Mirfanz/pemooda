@@ -49,3 +49,13 @@ export function getTimeStatus(
   else if (endDate && now >= endDate) return "ended";
   else return "ongoing";
 }
+
+export function maskEmail(email: string): string {
+  const [localPart, domain] = email.split("@");
+  const censor = "*".repeat(localPart.length - 3);
+  const maskedLocalPart = localPart.replace(
+    /^(.{2}).*(.)/,
+    "$1" + censor + "$2",
+  );
+  return `${maskedLocalPart}@${domain}`;
+}

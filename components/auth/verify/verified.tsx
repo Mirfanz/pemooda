@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@heroui/react";
-import { CheckCircle, ShieldCheck } from "@solar-icons/react";
+import { CheckCircle, VerifiedCheck } from "@solar-icons/react";
 
 const Verified = () => {
   return (
@@ -14,7 +14,7 @@ const Verified = () => {
           variant="shadow"
           className="size-18 text-slate-100 rounded-3xl shadow-lg mb-4"
         >
-          <ShieldCheck weight="BoldDuotone" className="size-12" />
+          <VerifiedCheck weight="BoldDuotone" className="size-12" />
         </Button>
         <h1 className="text-2xl font-bold mb-2 text-success flex gap-1 items-center">
           Account Verified <CheckCircle weight="Broken" className="size-6" />

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Card, CardBody, Divider, Avatar, Chip } from "@heroui/react";
 
 import { useAuth } from "@/contexts/auth-context";
@@ -22,13 +22,18 @@ import {
 } from "@solar-icons/react";
 
 const Account = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, getEmail } = useAuth();
   const router = useRouter();
+  const [email, setEmail] = useState<string>("Loading...");
 
   const handleLogout = () => {
     logout();
     router.push("/auth/login");
   };
+
+  useEffect(() => {
+    getEmail().then((email) => setEmail(email));
+  }, [email, getEmail]);
 
   const menuItems = [
     {
@@ -121,7 +126,7 @@ const Account = () => {
               </div>
               <div className="flex-1">
                 <p className="text-xs text-muted-foreground">Email</p>
-                <p className="font-medium">fake.email@gmail.com</p>
+                <p className="font-medium">{email}</p>
               </div>
             </div>
 

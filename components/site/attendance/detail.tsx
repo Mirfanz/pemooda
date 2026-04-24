@@ -24,6 +24,7 @@ import {
   StopCircle,
   QrCode,
   UsersGroupRounded,
+  ForwardRight,
 } from "@solar-icons/react";
 import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
@@ -32,6 +33,9 @@ import { QRCodeSVG } from "qrcode.react";
 import { AttendeeStatus } from "@/lib/generated/prisma/enums";
 import * as fns from "date-fns";
 import { id } from "date-fns/locale";
+import { TimeStatus } from "@/types";
+import { getTimeStatus } from "@/lib/utils";
+import { timeStatusEnum } from "@/config/enums";
 
 type Props = {
   activityId: string;
@@ -171,8 +175,10 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
     );
   }
 
-  const isStarted = !!attendance.startDate;
-  const isEnded = !!attendance.endDate;
+  const status: TimeStatus = getTimeStatus(
+    attendance.startDate,
+    attendance.endDate,
+  );
   const canManage = auth.hasRole([Role.KETUA, Role.SEKRETARIS]);
 
   const getStatusConfig = (status: AttendeeStatus) => {
@@ -208,24 +214,36 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
         {/* Header */}
         <section className="px-4 mt-4">
           <div className="flex items-center gap-2 mb-2">
-            {!isStarted && (
-              <Chip size="sm" color="default" variant="flat" radius="sm">
-                Not Started
+            {status == "upcoming" && (
+              <Chip
+                size="sm"
+                color={timeStatusEnum[status].color}
+                variant="flat"
+              >
+                Belum Dibuka
               </Chip>
             )}
-            {isStarted && !isEnded && (
-              <Chip size="sm" color="success" variant="flat" radius="sm">
-                Ongoing
+            {status == "ongoing" && (
+              <Chip
+                size="sm"
+                color={timeStatusEnum[status].color}
+                variant="flat"
+              >
+                Berlangsung
               </Chip>
             )}
-            {isEnded && (
-              <Chip size="sm" color="default" variant="flat" radius="sm">
-                Ended
+            {status == "ended" && (
+              <Chip
+                size="sm"
+                color={timeStatusEnum[status].color}
+                variant="flat"
+              >
+                Sudah Ditutup
               </Chip>
             )}
             {attendance.allowExternalUsers && (
-              <Chip size="sm" color="primary" variant="flat" radius="sm">
-                Public
+              <Chip size="sm" color="primary" variant="flat">
+                Terbuka Umum
               </Chip>
             )}
           </div>
@@ -296,7 +314,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
         </section>
 
         {/* QR Code - Only for admin when started */}
-        {canManage && isStarted && !isEnded && (
+        {canManage && status != "ended" && (
           <section className="px-4">
             <Card className="shadow-md">
               <CardBody className="p-4 flex flex-col items-center gap-3">
@@ -305,11 +323,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                   QR Code
                 </h3>
                 <div className="bg-white p-4 rounded-lg">
-                  <QRCodeSVG
-                    value={`${window.location.origin}/scan/${attendanceId}`}
-                    size={200}
-                    level="M"
-                  />
+                  <QRCodeSVG value={attendanceId} size={200} level="M" />
                 </div>
                 <p className="text-xs text-center text-default-500">
                   Scan QR code to record attendance
@@ -321,7 +335,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                   fullWidth
                   onPress={handleShare}
                 >
-                  Share Link
+                  <ForwardRight className="size-5" /> Share QR Absensi
                 </Button>
               </CardBody>
             </Card>
@@ -331,7 +345,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
         {/* Control Buttons */}
         {canManage && (
           <section className="px-4">
-            {!isStarted && (
+            {!attendance.startDate && (
               <Button
                 fullWidth
                 color="success"
@@ -344,7 +358,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                 Start Attendance
               </Button>
             )}
-            {isStarted && !isEnded && (
+            {status == "ongoing" && !attendance.endDate && (
               <Button
                 fullWidth
                 color="danger"

@@ -5,7 +5,7 @@ import { z } from "zod";
 
 const scanAttendanceSchema = z.object({
   name: z.string().min(1, "Name is required").optional(),
-  email: z.string().email("Invalid email").optional(),
+  email: z.email("Invalid email").optional(),
 });
 
 export async function POST(

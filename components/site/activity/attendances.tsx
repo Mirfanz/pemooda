@@ -5,14 +5,16 @@ import { Card, CardBody, Chip, Button } from "@heroui/react";
 import {
   UsersGroupRounded,
   AddSquare,
-  CheckCircle,
-  CloseCircle,
   ClockCircle,
-  MinusCircle,
+  UserCheck,
+  UserCross,
+  UserMinus,
 } from "@solar-icons/react";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
+import { displayIntervalDate, getTimeStatus } from "@/lib/utils";
+import { timeStatusEnum } from "@/config/enums";
 
 type Props = {
   activityId: string;
@@ -51,9 +53,12 @@ const Attendances = ({ activityId, attendances }: Props) => {
           ~ Belum ada absensi ~
         </p>
       ) : (
-        <div className="space-y-2">
+        <div className="flex flex-col gap-3">
           {attendances.map((attendance) => {
-            const status = getAttendanceStatus(attendance);
+            const status = getTimeStatus(
+              attendance.startDate,
+              attendance.endDate,
+            );
 
             return (
               <Link
@@ -62,89 +67,122 @@ const Attendances = ({ activityId, attendances }: Props) => {
               >
                 <Card
                   isPressable
-                  className="border border-default-200 hover:border-primary transition-colors"
+                  fullWidth
+                  shadow="none"
+                  className="border border-default-200 hover:border-primary"
                 >
                   <CardBody className="p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="font-semibold text-sm">
-                            {attendance.name}
-                          </h3>
-                          {status === "not-started" && (
-                            <Chip
-                              size="sm"
-                              variant="flat"
-                              color="default"
-                              radius="sm"
-                            >
-                              Belum Dibuka
-                            </Chip>
-                          )}
-                          {status === "ongoing" && (
-                            <Chip
-                              size="sm"
-                              variant="flat"
-                              color="success"
-                              radius="sm"
-                            >
-                              Berlangsung
-                            </Chip>
-                          )}
-                          {status === "ended" && (
-                            <Chip
-                              size="sm"
-                              variant="flat"
-                              color="default"
-                              radius="sm"
-                            >
-                              Selesai
-                            </Chip>
-                          )}
-                        </div>
-                        {attendance.description && (
-                          <p className="text-xs text-default-500 mb-2">
-                            {attendance.description}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-3 flex-wrap">
-                          <div className="flex items-center gap-1">
-                            <CheckCircle
-                              weight="Bold"
+                    <div className="mb-2">
+                      <h3 className="font-medium text-sm">{attendance.name}</h3>
+                      {attendance.description && (
+                        <p className="text-xs text-default-500 mt-1">
+                          {attendance.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap justify-between">
+                      {status === "upcoming" && (
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          color={timeStatusEnum[status].color}
+                          radius="sm"
+                        >
+                          {/* {timeStatusEnum[status].label} */}
+                          {attendance.startDate
+                            ? displayIntervalDate(attendance.startDate)
+                            : "Belum Mulai"}
+                        </Chip>
+                      )}
+                      {status === "ongoing" && (
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          color={timeStatusEnum[status].color}
+                          radius="sm"
+                        >
+                          {timeStatusEnum[status].label}
+                        </Chip>
+                      )}
+                      {status === "ended" && (
+                        <Chip
+                          size="sm"
+                          variant="flat"
+                          color={timeStatusEnum[status].color}
+                          radius="sm"
+                        >
+                          {timeStatusEnum[status].label}
+                        </Chip>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Chip
+                          variant="flat"
+                          size="sm"
+                          radius="sm"
+                          className={""}
+                          // className="flex items-center gap-1 ms-auto"
+                          startContent={
+                            <UserCheck
+                              weight="Broken"
                               className="size-3.5 text-success"
                             />
-                            <span className="text-xs text-default-600">
-                              {attendance.totalPresent}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <CloseCircle
-                              weight="Bold"
+                          }
+                        >
+                          <span className="text-xs text-default-600">
+                            {attendance.totalPresent}
+                          </span>
+                        </Chip>
+                        <Chip
+                          variant="flat"
+                          size="sm"
+                          radius="sm"
+                          className={""}
+                          // className="flex items-center gap-1"
+                          startContent={
+                            <UserCross
+                              weight="Broken"
                               className="size-3.5 text-danger"
                             />
-                            <span className="text-xs text-default-600">
-                              {attendance.totalAbsent}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MinusCircle
-                              weight="Bold"
+                          }
+                        >
+                          <span className="text-xs text-default-600">
+                            {attendance.totalAbsent}
+                          </span>
+                        </Chip>
+                        <Chip
+                          variant="flat"
+                          size="sm"
+                          radius="sm"
+                          className={""}
+                          // className="flex items-center gap-1"
+                          startContent={
+                            <UserMinus
+                              weight="Broken"
                               className="size-3.5 text-warning"
                             />
-                            <span className="text-xs text-default-600">
-                              {attendance.totalExcuse}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
+                          }
+                        >
+                          <span className="text-xs text-default-600">
+                            {attendance.totalExcuse}
+                          </span>
+                        </Chip>
+                        <Chip
+                          variant="flat"
+                          size="sm"
+                          radius="sm"
+                          className={""}
+                          // className="flex items-center gap-1"
+                          startContent={
                             <ClockCircle
-                              weight="Bold"
+                              weight="Broken"
                               className="size-3.5 text-default-400"
                             />
-                            <span className="text-xs text-default-600">
-                              {attendance.totalPending}
-                            </span>
-                          </div>
-                        </div>
+                          }
+                        >
+                          <span className="text-xs text-default-600">
+                            {attendance.totalPending}
+                          </span>
+                        </Chip>
                       </div>
                     </div>
                   </CardBody>

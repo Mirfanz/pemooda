@@ -3,15 +3,18 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardBody, Button, Skeleton, Alert, Chip } from "@heroui/react";
-import Navbar from "../navbar";
 import { CheckCircle, QrCode, CalendarMark } from "@solar-icons/react";
 import Swal from "sweetalert2";
 import axios from "axios";
 import * as fns from "date-fns";
 import { id } from "date-fns/locale";
+import { getTimeStatus } from "@/lib/utils";
+import { TimeStatus } from "@/types";
+import { timeStatusEnum } from "@/config/enums";
 
 type Props = {
   attendanceId: string;
+  onClose?: () => void;
 };
 
 type AttendanceInfo = {
@@ -28,7 +31,7 @@ type AttendanceInfo = {
   hasAttended: boolean;
 };
 
-const ScanAttendance = ({ attendanceId }: Props) => {
+const ScanAttendance = ({ attendanceId, onClose }: Props) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isScanLoading, setIsScanLoading] = useState(false);
@@ -140,193 +143,182 @@ const ScanAttendance = ({ attendanceId }: Props) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar title="Scan Absensi" />
-        <main className="p-4 space-y-4">
-          <Skeleton className="rounded-lg h-48" />
-          <Skeleton className="rounded-lg h-32" />
-        </main>
+      <div className="space-y-4">
+        <Skeleton className="rounded-lg h-48" />
+        <Skeleton className="rounded-lg h-32" />
       </div>
     );
   }
 
   if (error || !attendanceInfo) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar title="Scan Absensi" />
-        <main className="p-4">
-          <Alert
-            color="danger"
-            title="Error"
-            description={error || "Attendance not found"}
-          />
-          <Button
-            fullWidth
-            color="default"
-            variant="flat"
-            size="lg"
-            className="mt-4"
-            onPress={() => router.back()}
-          >
-            Kembali
-          </Button>
-        </main>
-      </div>
+      <Alert
+        color="danger"
+        title="Error"
+        description={error || "Attendance not found"}
+      />
     );
   }
 
-  const isStarted = !!attendanceInfo.startDate;
-  const isEnded = !!attendanceInfo.endDate;
+  const status: TimeStatus = getTimeStatus(
+    attendanceInfo.startDate,
+    attendanceInfo.endDate,
+  );
+
+  // if (status == "upcoming")
+  //   return (
+  //     <Alert
+  //       color="warning"
+  //       title="Belum Dibuka"
+  //       description="Absensi ini belum dibuka. Silakan tunggu ketua/sekretaris membuka absensi."
+  //     />
+  //   );
+  // if (status == "ended")
+  //   return (
+  //     <Alert
+  //       color="danger"
+  //       title="Sudah Ditutup"
+  //       description="Absensi ini sudah ditutup. Anda tidak dapat lagi mencatat kehadiran."
+  //     />
+  //   );
+  if (attendanceInfo.hasAttended)
+    return (
+      <Alert
+        color="success"
+        title="Sudah Absen"
+        description="Anda sudah mencatat kehadiran di absensi ini."
+        startContent={<CheckCircle weight="Bold" className="size-5" />}
+      />
+    );
+  if (hasScanned)
+    return (
+      <Alert
+        color="success"
+        title="Berhasil!"
+        description="Kehadiran Anda telah tercatat."
+        startContent={<CheckCircle weight="Bold" className="size-5" />}
+      />
+    );
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar title="Scan Absensi" />
+    <div className="">
+      <Card className="shadow-md">
+        <CardBody className="p-6 space-y-4">
+          <div className="flex justify-center">
+            <div className="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-full">
+              <QrCode weight="Bold" className="size-16 text-primary" />
+            </div>
+          </div>
 
-      <main className="p-4 space-y-4">
-        {!isStarted && (
-          <Alert
-            color="warning"
-            title="Belum Dibuka"
-            description="Absensi ini belum dibuka. Silakan tunggu ketua/sekretaris membuka absensi."
-          />
-        )}
-
-        {isEnded && (
-          <Alert
-            color="danger"
-            title="Sudah Ditutup"
-            description="Absensi ini sudah ditutup. Anda tidak dapat lagi mencatat kehadiran."
-          />
-        )}
-
-        {attendanceInfo.hasAttended && (
-          <Alert
-            color="success"
-            title="Sudah Absen"
-            description="Anda sudah mencatat kehadiran di absensi ini."
-            startContent={<CheckCircle weight="Bold" className="size-5" />}
-          />
-        )}
-
-        {hasScanned && (
-          <Alert
-            color="success"
-            title="Berhasil!"
-            description="Kehadiran Anda telah tercatat."
-            startContent={<CheckCircle weight="Bold" className="size-5" />}
-          />
-        )}
-
-        <Card className="shadow-md">
-          <CardBody className="p-6 space-y-4">
-            <div className="flex justify-center">
-              <div className="p-4 bg-primary-50 dark:bg-primary-900/20 rounded-full">
-                <QrCode weight="Bold" className="size-16 text-primary" />
+          <div className="space-y-3">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <CalendarMark
+                  weight="Broken"
+                  className="size-4 text-default-500"
+                />
+                <span className="text-xs text-default-500">Kegiatan</span>
               </div>
+              <h3 className="text-lg font-semibold">
+                {attendanceInfo.activity.title}
+              </h3>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <CalendarMark
-                    weight="Broken"
-                    className="size-4 text-default-500"
-                  />
-                  <span className="text-xs text-default-500">Kegiatan</span>
-                </div>
-                <h3 className="text-lg font-semibold">
-                  {attendanceInfo.activity.title}
-                </h3>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <CheckCircle
+                  weight="Broken"
+                  className="size-4 text-default-500"
+                />
+                <span className="text-xs text-default-500">Absensi</span>
               </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <CheckCircle
-                    weight="Broken"
-                    className="size-4 text-default-500"
-                  />
-                  <span className="text-xs text-default-500">Absensi</span>
-                </div>
-                <h2 className="text-xl font-bold">{attendanceInfo.name}</h2>
-              </div>
-
-              {attendanceInfo.description && (
-                <p className="text-sm text-default-500">
-                  {attendanceInfo.description}
-                </p>
-              )}
-
-              <div className="flex items-center gap-2 flex-wrap">
-                {!isStarted && (
-                  <Chip size="sm" color="default" variant="flat">
-                    Belum Dibuka
-                  </Chip>
-                )}
-                {isStarted && !isEnded && (
-                  <Chip size="sm" color="success" variant="flat">
-                    Berlangsung
-                  </Chip>
-                )}
-                {isEnded && (
-                  <Chip size="sm" color="default" variant="flat">
-                    Sudah Ditutup
-                  </Chip>
-                )}
-                {attendanceInfo.allowExternalUsers && (
-                  <Chip size="sm" color="primary" variant="flat">
-                    Terbuka Umum
-                  </Chip>
-                )}
-              </div>
+              <h2 className="text-xl font-bold">{attendanceInfo.name}</h2>
             </div>
 
-            {isStarted &&
-              !isEnded &&
-              !hasScanned &&
-              !attendanceInfo.hasAttended && (
-                <Button
-                  fullWidth
-                  color="primary"
-                  variant="shadow"
-                  size="lg"
-                  startContent={
-                    <CheckCircle weight="Bold" className="size-5" />
-                  }
-                  onPress={handleConfirmScan}
-                  isLoading={isScanLoading}
+            {attendanceInfo.description && (
+              <p className="text-sm text-default-500">
+                {attendanceInfo.description}
+              </p>
+            )}
+
+            <div className="flex items-center gap-2 flex-wrap">
+              {status == "upcoming" && (
+                <Chip
+                  size="sm"
+                  color={timeStatusEnum[status].color}
+                  variant="flat"
                 >
-                  Catat Kehadiran
-                </Button>
+                  Belum Dibuka
+                </Chip>
               )}
+              {status == "ongoing" && (
+                <Chip
+                  size="sm"
+                  color={timeStatusEnum[status].color}
+                  variant="flat"
+                >
+                  Berlangsung
+                </Chip>
+              )}
+              {status == "ended" && (
+                <Chip
+                  size="sm"
+                  color={timeStatusEnum[status].color}
+                  variant="flat"
+                >
+                  Sudah Ditutup
+                </Chip>
+              )}
+              {attendanceInfo.allowExternalUsers && (
+                <Chip size="sm" color="primary" variant="flat">
+                  Terbuka Umum
+                </Chip>
+              )}
+            </div>
+          </div>
 
-            {(hasScanned ||
-              attendanceInfo.hasAttended ||
-              !isStarted ||
-              isEnded) && (
+          {status == "ongoing" &&
+            !hasScanned &&
+            !attendanceInfo.hasAttended && (
               <Button
                 fullWidth
-                color="default"
-                variant="flat"
+                color="primary"
+                variant="shadow"
                 size="lg"
-                onPress={() => router.back()}
+                startContent={<CheckCircle weight="Bold" className="size-5" />}
+                onPress={handleConfirmScan}
+                isLoading={isScanLoading}
               >
-                Kembali
+                Catat Kehadiran
               </Button>
             )}
+
+          {(hasScanned ||
+            attendanceInfo.hasAttended ||
+            status != "ongoing") && (
+            <Button
+              fullWidth
+              color="default"
+              variant="flat"
+              size="lg"
+              onPress={() => onClose?.()}
+            >
+              Kembali
+            </Button>
+          )}
+        </CardBody>
+      </Card>
+
+      {status == "ongoing" && (
+        <Card className="bg-primary-50 mt-4 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+          <CardBody className="p-4">
+            <p className="text-sm text-center text-primary-700 dark:text-primary-400">
+              Pastikan Anda berada di lokasi yang benar sebelum mencatat
+              kehadiran
+            </p>
           </CardBody>
         </Card>
-
-        {isStarted && !isEnded && (
-          <Card className="bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
-            <CardBody className="p-4">
-              <p className="text-sm text-center text-primary-700 dark:text-primary-400">
-                Pastikan Anda berada di lokasi yang benar sebelum mencatat
-                kehadiran
-              </p>
-            </CardBody>
-          </Card>
-        )}
-      </main>
+      )}
     </div>
   );
 };

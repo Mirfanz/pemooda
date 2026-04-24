@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Card, CardBody, Button, Skeleton, Alert, Chip } from "@heroui/react";
 import { CheckCircle, QrCode, CalendarMark } from "@solar-icons/react";
 import Swal from "sweetalert2";
@@ -32,7 +31,6 @@ type AttendanceInfo = {
 };
 
 const ScanAttendance = ({ attendanceId, onClose }: Props) => {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isScanLoading, setIsScanLoading] = useState(false);
   const [attendanceInfo, setAttendanceInfo] = useState<AttendanceInfo | null>(
@@ -50,14 +48,12 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
     try {
       const { data } = await axios.get(`/api/attendance/${attendanceId}/info`);
       setAttendanceInfo(data.data);
-      setIsLoading(false);
     } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errorData = error.response.data;
-        setError(errorData.message || "Failed to load attendance");
-      } else {
-        setError("An unexpected error occurred");
-      }
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Gagal memuat informasi absensi"
+        : "Terjadi kesalahan yang tidak terduga";
+      setError(message);
+    } finally {
       setIsLoading(false);
     }
   };
@@ -92,14 +88,13 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
     setIsScanLoading(true);
 
     try {
-      const response = await axios.post(
+      const { data } = await axios.post(
         `/api/attendance/${attendanceId}/scan`,
         {},
       );
-
       setHasScanned(true);
 
-      const attendedAt = response.data.data?.attendedAt;
+      const attendedAt = data.data?.attendedAt;
       const timeText = attendedAt
         ? fns.format(new Date(attendedAt), "HH:mm:ss", { locale: id })
         : "";
@@ -117,25 +112,19 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
         showConfirmButton: false,
       });
 
-      // Redirect back after success
       setTimeout(() => {
-        router.back();
+        onClose?.();
       }, 3000);
     } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errorData = error.response.data;
-        Swal.fire({
-          icon: "error",
-          title: "Gagal!",
-          text: errorData.message || "Gagal mencatat kehadiran",
-        });
-      } else {
-        Swal.fire({
-          icon: "error",
-          title: "Gagal!",
-          text: "Terjadi kesalahan yang tidak terduga",
-        });
-      }
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.message || "Gagal mencatat kehadiran"
+        : "Terjadi kesalahan yang tidak terduga";
+
+      await Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: message,
+      });
     } finally {
       setIsScanLoading(false);
     }
@@ -143,20 +132,31 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="rounded-lg h-48" />
-        <Skeleton className="rounded-lg h-32" />
-      </div>
+      <main className="space-y-4 p-4">
+        <Skeleton className="rounded-lg h-24" />
+        <Skeleton className="rounded-lg h-72" />
+      </main>
     );
   }
 
   if (error || !attendanceInfo) {
     return (
-      <Alert
-        color="danger"
-        title="Error"
-        description={error || "Attendance not found"}
-      />
+      <main className="space-y-4 p-4">
+        <Alert
+          color="danger"
+          title="Error"
+          description={error || "Attendance not found"}
+        />
+        <Button
+          fullWidth
+          color="default"
+          variant="flat"
+          size="lg"
+          onPress={() => onClose?.()}
+        >
+          Kembali
+        </Button>
+      </main>
     );
   }
 
@@ -165,43 +165,47 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
     attendanceInfo.endDate,
   );
 
-  // if (status == "upcoming")
-  //   return (
-  //     <Alert
-  //       color="warning"
-  //       title="Belum Dibuka"
-  //       description="Absensi ini belum dibuka. Silakan tunggu ketua/sekretaris membuka absensi."
-  //     />
-  //   );
-  // if (status == "ended")
-  //   return (
-  //     <Alert
-  //       color="danger"
-  //       title="Sudah Ditutup"
-  //       description="Absensi ini sudah ditutup. Anda tidak dapat lagi mencatat kehadiran."
-  //     />
-  //   );
-  if (attendanceInfo.hasAttended)
+  const hasUserAttended = hasScanned || attendanceInfo.hasAttended;
+  const canScan = status === "ongoing" && !hasUserAttended;
+
+  const statusLabelMap: Record<TimeStatus, string> = {
+    upcoming: "Belum Dibuka",
+    ongoing: "Berlangsung",
+    ended: "Sudah Ditutup",
+  };
+
+  const renderStatusAlert = () => {
+    if (hasUserAttended) {
+      return (
+        <Alert
+          color="success"
+          title="Sudah Absen"
+          description="Anda sudah mencatat kehadiran di absensi ini."
+        />
+      );
+    }
+
+    if (status === "ended") {
+      return (
+        <Alert
+          color="danger"
+          title="Absensi Ditutup"
+          description="Absensi ini sudah ditutup dan tidak dapat diakses lagi."
+        />
+      );
+    }
+
     return (
       <Alert
-        color="success"
-        title="Sudah Absen"
-        description="Anda sudah mencatat kehadiran di absensi ini."
-        startContent={<CheckCircle weight="Bold" className="size-5" />}
+        color="warning"
+        title="Absensi Belum Dimulai"
+        description="Absensi ini belum dimulai."
       />
     );
-  if (hasScanned)
-    return (
-      <Alert
-        color="success"
-        title="Berhasil!"
-        description="Kehadiran Anda telah tercatat."
-        startContent={<CheckCircle weight="Bold" className="size-5" />}
-      />
-    );
+  };
 
   return (
-    <div className="">
+    <main className="p-4 space-y-4">
       <Card className="shadow-md">
         <CardBody className="p-6 space-y-4">
           <div className="flex justify-center">
@@ -242,33 +246,13 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
             )}
 
             <div className="flex items-center gap-2 flex-wrap">
-              {status == "upcoming" && (
-                <Chip
-                  size="sm"
-                  color={timeStatusEnum[status].color}
-                  variant="flat"
-                >
-                  Belum Dibuka
-                </Chip>
-              )}
-              {status == "ongoing" && (
-                <Chip
-                  size="sm"
-                  color={timeStatusEnum[status].color}
-                  variant="flat"
-                >
-                  Berlangsung
-                </Chip>
-              )}
-              {status == "ended" && (
-                <Chip
-                  size="sm"
-                  color={timeStatusEnum[status].color}
-                  variant="flat"
-                >
-                  Sudah Ditutup
-                </Chip>
-              )}
+              <Chip
+                size="sm"
+                color={timeStatusEnum[status].color}
+                variant="flat"
+              >
+                {statusLabelMap[status]}
+              </Chip>
               {attendanceInfo.allowExternalUsers && (
                 <Chip size="sm" color="primary" variant="flat">
                   Terbuka Umum
@@ -277,9 +261,10 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
             </div>
           </div>
 
-          {status == "ongoing" &&
-            !hasScanned &&
-            !attendanceInfo.hasAttended && (
+          {renderStatusAlert()}
+
+          <div className="flex flex-col gap-4 mt-2">
+            {canScan && (
               <Button
                 fullWidth
                 color="primary"
@@ -293,9 +278,6 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
               </Button>
             )}
 
-          {(hasScanned ||
-            attendanceInfo.hasAttended ||
-            status != "ongoing") && (
             <Button
               fullWidth
               color="default"
@@ -305,21 +287,10 @@ const ScanAttendance = ({ attendanceId, onClose }: Props) => {
             >
               Kembali
             </Button>
-          )}
+          </div>
         </CardBody>
       </Card>
-
-      {status == "ongoing" && (
-        <Card className="bg-primary-50 mt-4 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
-          <CardBody className="p-4">
-            <p className="text-sm text-center text-primary-700 dark:text-primary-400">
-              Pastikan Anda berada di lokasi yang benar sebelum mencatat
-              kehadiran
-            </p>
-          </CardBody>
-        </Card>
-      )}
-    </div>
+    </main>
   );
 };
 

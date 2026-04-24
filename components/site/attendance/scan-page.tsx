@@ -1,73 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Card, CardBody, Button, Alert, addToast } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import Navbar from "../navbar";
-import { QrCode } from "@solar-icons/react";
-import axios from "axios";
 import QRScanner from "./scanner";
 import ScanAttendance from "./scan";
 
 const ScanPage = () => {
-  const router = useRouter();
-  const [scanning, setScanning] = useState(false);
-  const [selectedAttendance, setSelectedAttendance] = useState<string | null>(
-    null,
-  );
+  const [attendanceId, setAttendanceId] = useState<string | null>(null);
 
   const handleScanResult = async (result: string) => {
-    const attendanceId = result;
-
-    if (!attendanceId.trim()) {
+    if (!result.trim()) {
       addToast({
         color: "warning",
         title: "QR code tidak valid",
       });
       return;
     }
-
-    try {
-      // Verify attendance exists and get info
-      // await axios.get(`/api/attendance/${attendanceId.trim()}/info`);
-      // Redirect to scan confirmation page
-      // router.push(`/scan/${attendanceId.trim()}`);
-      setSelectedAttendance(attendanceId.trim());
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errorData = error.response.data;
-        addToast({
-          color: "danger",
-          title: errorData.message || "Attendance not found",
-        });
-      } else {
-        addToast({
-          color: "danger",
-          title: "Terjadi kesalahan",
-        });
-      }
-      setScanning(false);
-    }
-  };
-
-  const handleScanQR = () => {
-    setScanning(true);
+    setAttendanceId(result.trim());
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navbar title="Scan Absensi" />
 
-      <main className="p-4 space-y-4">
-        <Alert
-          color="warning"
-          variant="faded"
-          // title="Cara Absen"
-          description="Pastikan Anda berada di lokasi yang
-              benar sebelum melakukan absensi"
+      {attendanceId ? (
+        <ScanAttendance
+          attendanceId={attendanceId}
+          onClose={() => setAttendanceId(null)}
         />
-
-        <Card className="shadow-md" hidden={!!selectedAttendance}>
+      ) : (
+        <QRScanner onScan={handleScanResult} />
+      )}
+      {/* <main className="p-4 space-y-4">
+        <Card className="shadow-md">
           {scanning ? (
             <CardBody className="p-6">
               <QRScanner
@@ -104,16 +70,7 @@ const ScanPage = () => {
             </CardBody>
           )}
         </Card>
-
-        {!!selectedAttendance && (
-          <ScanAttendance
-            attendanceId={selectedAttendance}
-            onClose={() => {
-              setSelectedAttendance(null);
-            }}
-          />
-        )}
-      </main>
+      </main> */}
     </div>
   );
 };

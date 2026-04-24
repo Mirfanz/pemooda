@@ -120,29 +120,105 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
   };
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/scan/${attendanceId}`;
-    const shareData = {
-      title: attendance?.name || "Attendance",
-      text: `Scan QR code untuk absensi: ${attendance?.name}`,
-      url,
-    };
-
     try {
-      if (navigator.share && navigator.canShare(shareData)) {
-        await navigator.share(shareData);
-      } else {
+      // Get QR code SVG element by specific ID
+      const qrElement = document.getElementById(
+        "qr-attendance",
+      ) as SVGElement | null;
+      if (!qrElement) {
+        throw new Error("QR code not found");
+      }
+
+      // Convert SVG to Canvas
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas context not available");
+
+      const svgData = new XMLSerializer().serializeToString(qrElement);
+      const img = new Image();
+
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          ctx.drawImage(img, 0, 0);
+          resolve();
+        };
+        img.onerror = () => reject(new Error("Failed to load QR code image"));
+        img.src = `data:image/svg+xml;base64,${btoa(svgData)}`;
+      });
+
+      // Convert Canvas to Blob
+      canvas.toBlob(async (blob) => {
+        if (!blob) throw new Error("Failed to create blob");
+
+        // Create metadata
+        const url = `${window.location.origin}/activity/${activityId}/attendance/${attendanceId}`;
+        const startDate = attendance?.startDate
+          ? fns.format(new Date(attendance.startDate), "dd MMM yyyy HH:mm", {
+              locale: id,
+            })
+          : "";
+        const endDate = attendance?.endDate
+          ? fns.format(new Date(attendance.endDate), "dd MMM yyyy HH:mm", {
+              locale: id,
+            })
+          : "";
+
+        const text =
+          `Absensi: ${attendance?.name}\n` +
+          (startDate && endDate ? `Waktu: ${startDate} - ${endDate}\n` : "") +
+          `Link: ${url}`;
+
+        // Try Web Share API
+        if (navigator.share) {
+          const file = new File([blob], "qr-attendance.png", {
+            type: "image/png",
+          });
+
+          const shareData = {
+            title: `QR Absensi: ${attendance?.name}`,
+            text,
+            files: [file],
+          };
+
+          if (navigator.canShare(shareData)) {
+            await navigator.share(shareData);
+            return;
+          }
+        }
+
+        // Fallback: Copy link to clipboard if share not available
         await navigator.clipboard.writeText(url);
         Swal.fire({
           icon: "success",
-          title: "Link Copied!",
-          text: "Attendance link has been copied to clipboard",
+          title: "Link Tersalin!",
+          text: "Link absensi telah disalin ke clipboard",
           timer: 2000,
           showConfirmButton: false,
         });
-      }
+      }, "image/png");
     } catch (err) {
-      if (err instanceof Error) {
-        console.error("Error sharing:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      console.error("Error sharing:", err);
+
+      // Fallback: Share URL only
+      try {
+        const url = `${window.location.origin}/activity/${activityId}/attendance/${attendanceId}`;
+        await navigator.clipboard.writeText(url);
+        Swal.fire({
+          icon: "success",
+          title: "Link Tersalin!",
+          text: "Link absensi telah disalin ke clipboard",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      } catch {
+        Swal.fire({
+          icon: "error",
+          title: "Gagal Bagikan!",
+          text: errorMessage,
+        });
       }
     }
   };
@@ -314,33 +390,40 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
         </section>
 
         {/* QR Code - Only for admin when started */}
-        {canManage && status != "ended" && (
-          <section className="px-4">
-            <Card className="shadow-md">
-              <CardBody className="p-4 flex flex-col items-center gap-3">
-                <h3 className="font-semibold flex items-center gap-2 self-start">
-                  <QrCode weight="Bold" className="size-5 text-primary" />
-                  QR Code
-                </h3>
-                <div className="bg-white p-4 rounded-lg">
-                  <QRCodeSVG value={attendanceId} size={200} level="M" />
-                </div>
-                <p className="text-xs text-center text-default-500">
-                  Scan QR code to record attendance
-                </p>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  color="primary"
-                  fullWidth
-                  onPress={handleShare}
-                >
-                  <ForwardRight className="size-5" /> Share QR Absensi
-                </Button>
-              </CardBody>
-            </Card>
-          </section>
-        )}
+        {auth.hasRole([Role.BENDAHARA, Role.SEKRETARIS, Role.KETUA]) &&
+          status != "ended" && (
+            <section className="px-4">
+              <Card className="shadow-md">
+                <CardBody className="p-4 flex flex-col items-center gap-3">
+                  <h3 className="font-semibold flex items-center gap-2 self-start">
+                    <QrCode weight="Bold" className="size-5 text-primary" />
+                    QR Code
+                  </h3>
+                  <div className="bg-white p-4 rounded-lg">
+                    <QRCodeSVG
+                      id="qr-attendance"
+                      value={attendanceId}
+                      size={200}
+                      level="M"
+                    />
+                  </div>
+                  <p className="text-xs text-center text-default-500">
+                    Scan QR code to record attendance
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    color="primary"
+                    fullWidth
+                    onPress={handleShare}
+                  >
+                    <ForwardRight weight="Broken" className="size-5" /> Bagikan
+                    QR Absensi
+                  </Button>
+                </CardBody>
+              </Card>
+            </section>
+          )}
 
         {/* Control Buttons */}
         {canManage && (

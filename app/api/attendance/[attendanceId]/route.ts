@@ -85,6 +85,7 @@ export async function GET(
         name: attendee.name,
         email: attendee.email,
         attendedAt: attendee.attendedAt,
+        excuseDescription: attendee.excuseDescription,
         createdAt: attendee.createdAt,
         updatedAt: attendee.updatedAt,
         user: attendee.user,

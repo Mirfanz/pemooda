@@ -105,12 +105,28 @@ export async function POST(
         );
       }
 
+      // Calculate count updates based on old status
+      const countUpdates: Record<string, number> = {
+        totalPresent: 1,
+        totalPending: 0,
+        totalAbsent: 0,
+        totalExcuse: 0,
+      };
+
+      // Decrease old status count
+      if (existingAttendee.status === "PENDING") countUpdates.totalPending = -1;
+      else if (existingAttendee.status === "ABSENT")
+        countUpdates.totalAbsent = -1;
+      else if (existingAttendee.status === "EXCUSE")
+        countUpdates.totalExcuse = -1;
+
       // Update existing attendee to present
       const updatedAttendee = await prisma.attendee.update({
         where: { id: existingAttendee.id },
         data: {
           status: "PRESENT",
           attendedAt: now,
+          excuseDescription: null, // Clear excuse description when marking present
         },
         include: {
           user: {
@@ -127,8 +143,10 @@ export async function POST(
       await prisma.attendance.update({
         where: { id: attendanceId },
         data: {
-          totalPresent: { increment: 1 },
-          totalPending: { decrement: 1 },
+          totalPresent: { increment: countUpdates.totalPresent },
+          totalPending: { increment: countUpdates.totalPending },
+          totalAbsent: { increment: countUpdates.totalAbsent },
+          totalExcuse: { increment: countUpdates.totalExcuse },
         },
       });
 

@@ -158,3 +158,79 @@ export function useDeleteAttendance() {
     },
   });
 }
+
+export function useMarkAttendeeExcuse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      attendanceId: string;
+      attendeeId: string;
+      excuseDescription?: string;
+    }) => {
+      const { attendanceId, attendeeId, ...body } = data;
+      const response = await axios.patch(
+        `/api/attendance/${attendanceId}/attendees/${attendeeId}`,
+        {
+          action: "mark_excuse",
+          ...body,
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.detail(variables.attendanceId),
+      });
+    },
+  });
+}
+
+export function useUpdateAttendeeExcuse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: {
+      attendanceId: string;
+      attendeeId: string;
+      excuseDescription: string;
+    }) => {
+      const { attendanceId, attendeeId, ...body } = data;
+      const response = await axios.patch(
+        `/api/attendance/${attendanceId}/attendees/${attendeeId}`,
+        {
+          action: "update_excuse",
+          ...body,
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.detail(variables.attendanceId),
+      });
+    },
+  });
+}
+
+export function useCancelAttendeeExcuse() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { attendanceId: string; attendeeId: string }) => {
+      const { attendanceId, attendeeId } = data;
+      const response = await axios.patch(
+        `/api/attendance/${attendanceId}/attendees/${attendeeId}`,
+        {
+          action: "cancel_excuse",
+        },
+      );
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.detail(variables.attendanceId),
+      });
+    },
+  });
+}

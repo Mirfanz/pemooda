@@ -131,6 +131,7 @@ export interface Attendee {
   name: string | null;
   email: string | null;
   attendedAt: Date | string | null;
+  excuseDescription: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
   user?: UserMinimal | null;

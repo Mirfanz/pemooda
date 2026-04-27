@@ -168,15 +168,16 @@ model Attendance {
 }
 
 model Attendee {
-  id           String         @id @default(cuid())
-  userId       String?        @map("user_id")
-  attendanceId String         @map("attendance_id")
-  status       AttendeeStatus @default(PENDING)
-  name         String?
-  email        String?        @db.Citext
-  attendedAt   DateTime?      @map("attended_at")
-  createdAt    DateTime       @default(now()) @map("created_at")
-  updatedAt    DateTime       @updatedAt @map("updated_at")
+  id                 String         @id @default(cuid())
+  userId             String?        @map("user_id")
+  attendanceId       String         @map("attendance_id")
+  status             AttendeeStatus @default(PENDING)
+  name               String?
+  email              String?        @db.Citext
+  attendedAt         DateTime?      @map("attended_at")
+  excuseDescription  String?        @map("excuse_description")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
 
   user       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
   attendance Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)

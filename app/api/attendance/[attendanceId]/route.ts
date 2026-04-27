@@ -1,7 +1,8 @@
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, hasRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Attendance, AttendanceSummary } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
+import { Role } from "@/lib/generated/prisma/enums";
 
 export async function GET(
   req: NextRequest,
@@ -109,6 +110,93 @@ export async function GET(
     );
   } catch (error) {
     console.error("Error getting attendance:", error);
+    return NextResponse.json(
+      { success: false, message: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ attendanceId: string }> },
+) {
+  try {
+    const currentUser = await getCurrentUser();
+    const { attendanceId } = await params;
+
+    if (!currentUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
+    }
+
+    if (!currentUser.organization) {
+      return NextResponse.json(
+        { success: false, message: "Not joined organization yet" },
+        { status: 403 },
+      );
+    }
+
+    // Check if user has permission to delete (only KETUA and SEKRETARIS)
+    if (!hasRole(currentUser.role, [Role.KETUA, Role.SEKRETARIS])) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "You don't have permission to delete attendance",
+        },
+        { status: 403 },
+      );
+    }
+
+    const attendanceFromDB = await prisma.attendance.findFirst({
+      where: {
+        id: attendanceId,
+        activity: {
+          organizationId: currentUser.organization.id,
+        },
+      },
+      include: {
+        activity: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!attendanceFromDB) {
+      return NextResponse.json(
+        { success: false, message: "Attendance not found" },
+        { status: 404 },
+      );
+    }
+
+    // Delete all related attendees first
+    await prisma.attendee.deleteMany({
+      where: {
+        attendanceId,
+      },
+    });
+
+    // Delete the attendance
+    await prisma.attendance.delete({
+      where: {
+        id: attendanceId,
+      },
+    });
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Attendance deleted successfully",
+        data: { attendanceId },
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Error deleting attendance:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
       { status: 500 },

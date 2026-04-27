@@ -4,6 +4,7 @@ import {
   useAttendance,
   useStartAttendance,
   useEndAttendance,
+  useDeleteAttendance,
 } from "@/hooks/queries/attendance";
 import Navbar from "../navbar";
 import {
@@ -14,6 +15,10 @@ import {
   Chip,
   Avatar,
   Divider,
+  MenuItem,
+  DropdownMenu,
+  Dropdown,
+  DropdownTrigger,
 } from "@heroui/react";
 import {
   CheckCircle,
@@ -25,6 +30,8 @@ import {
   QrCode,
   UsersGroupRounded,
   ForwardRight,
+  MenuDots,
+  TrashBinMinimalistic,
 } from "@solar-icons/react";
 import { useAuth } from "@/contexts/auth-context";
 import { Role } from "@/lib/generated/prisma/enums";
@@ -36,6 +43,7 @@ import { id } from "date-fns/locale";
 import { TimeStatus } from "@/types";
 import { getTimeStatus } from "@/lib/utils";
 import { timeStatusEnum } from "@/config/enums";
+import { useRouter } from "next/navigation";
 
 type Props = {
   activityId: string;
@@ -45,8 +53,10 @@ type Props = {
 const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
   const { isLoading, data } = useAttendance(attendanceId);
   const auth = useAuth();
+  const router = useRouter();
   const startAttendance = useStartAttendance();
   const endAttendance = useEndAttendance();
+  const deleteAttendance = useDeleteAttendance();
 
   const attendance = data?.attendance;
   const summary = data?.summary;
@@ -107,6 +117,41 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
           timer: 2000,
           showConfirmButton: false,
         });
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "An error occurred";
+        Swal.fire({
+          icon: "error",
+          title: "Failed!",
+          text: errorMessage,
+        });
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    const result = await Swal.fire({
+      title: "Delete Attendance?",
+      text: "This action cannot be undone. All attendance records will be deleted.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Delete!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deleteAttendance.mutateAsync(attendanceId);
+        Swal.fire({
+          icon: "success",
+          title: "Deleted!",
+          text: "Attendance has been deleted",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+        router.push(`/activity/${activityId}`);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "An error occurred";
@@ -284,7 +329,31 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Navbar title="Attendance Detail" />
+      <Navbar
+        title="Attendance Detail"
+        endContent={
+          <Dropdown placement="bottom-end">
+            <DropdownTrigger>
+              <Button isIconOnly size="sm">
+                <MenuDots weight="Linear" className="size-4" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu variant="flat">
+              {canManage ? (
+                <MenuItem
+                  color="danger"
+                  key={"delete"}
+                  className="text-danger"
+                  startContent={<TrashBinMinimalistic className="size-4" />}
+                  onPress={handleDelete}
+                >
+                  Hapus Absensi
+                </MenuItem>
+              ) : null}
+            </DropdownMenu>
+          </Dropdown>
+        }
+      />
 
       <main className="space-y-4">
         {/* Header */}

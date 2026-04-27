@@ -138,3 +138,23 @@ export function useScanAttendance() {
     },
   });
 }
+
+export function useDeleteAttendance() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (attendanceId: string) => {
+      const response = await axios.delete<{
+        success: boolean;
+        message: string;
+        data: { attendanceId: string };
+      }>(`/api/attendance/${attendanceId}`);
+      return response.data;
+    },
+    onSuccess: (_, attendanceId) => {
+      queryClient.invalidateQueries({
+        queryKey: attendanceKeys.all,
+      });
+    },
+  });
+}

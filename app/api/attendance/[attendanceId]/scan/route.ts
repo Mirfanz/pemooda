@@ -38,8 +38,6 @@ export async function POST(
       );
     }
 
-    const { name, email } = validation.data;
-
     const attendance = await prisma.attendance.findUnique({
       where: { id: attendanceId },
       include: {

@@ -9,14 +9,14 @@ export async function GET() {
     if (!currentUser) {
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     if (!currentUser.organization) {
       return NextResponse.json(
         { success: false, message: "Not joined organization yet" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -35,6 +35,9 @@ export async function GET() {
             organizationId: true,
             totalMembers: true,
             totalActivities: true,
+            totalFinanceReport: true,
+            totalExpenses: true,
+            totalIncomes: true,
           },
         },
         creator: {
@@ -50,7 +53,7 @@ export async function GET() {
     if (!organization) {
       return NextResponse.json(
         { success: false, message: "Organization not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
     const data: Organization = {
@@ -77,7 +80,7 @@ export async function GET() {
     console.error("Error fetching organization detail:", error);
     return NextResponse.json(
       { success: false, message: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

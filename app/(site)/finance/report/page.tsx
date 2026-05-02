@@ -1,3 +1,5 @@
-export default function FinanceReportPage() {
-  return <div>Finance Report Page</div>;
+import FinanceReportMain from "@/components/site/finance/report";
+
+export default async function FinanceReportPage() {
+  return <FinanceReportMain />;
 }

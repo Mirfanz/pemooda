@@ -43,6 +43,9 @@ export interface OrganizationSummary {
   organizationId: string;
   totalMembers: number;
   totalActivities: number;
+  totalFinanceReport: number;
+  totalExpenses: number;
+  totalIncomes: number;
 }
 
 export interface Organization extends OrganizationMinimal {
@@ -72,6 +75,17 @@ export interface OrganizationInvitation {
   expiresAt: Date | string;
   organization: OrganizationMinimal;
   creator: UserMinimal;
+}
+
+export interface ActivityMinimal {
+  id: string;
+  title: string;
+  description: string | null;
+  type: ActivityType;
+  isPublic: boolean;
+  startDate: Date | string;
+  endDate: Date | string | null;
+  location: string;
 }
 
 export interface Activity {
@@ -168,6 +182,6 @@ export interface FinanceReport {
   createdAt: Date | string;
   updatedAt: Date | string;
   organization: OrganizationMinimal;
-  activity: Activity | null;
+  activity: ActivityMinimal | null;
   creator: UserMinimal;
 }

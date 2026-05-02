@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { OrganizationFull } from "@/types";
+import { Organization } from "@/types";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -53,7 +53,7 @@ export async function GET() {
         { status: 404 }
       );
     }
-    const data: OrganizationFull = {
+    const data: Organization = {
       id: organization.id,
       name: organization.name,
       imageUrl: organization.imageUrl,

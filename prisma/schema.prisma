@@ -35,6 +35,7 @@ model User {
   createdInvitations   Invitation[]        @relation("InvitationCreator")
   attendees            Attendee[]
   verificationTokens   VerificationToken[]
+  financeReports       FinanceReport[]     @relation("FinanceReportCreator")
 
   @@index([organizationId])
   @@index([email])
@@ -63,13 +64,14 @@ model Organization {
   updatedAt DateTime @updatedAt @map("updated_at")
   createdBy String   @map("created_by")
 
-  users         User[]
-  details       OrganizationDetail?
-  summary       OrganizationSummary?
-  activities    Activity[]
-  announcements Announcement[]
-  invitations   Invitation[]
-  creator       User                 @relation(name: "OrganizationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  users          User[]
+  details        OrganizationDetail?
+  summary        OrganizationSummary?
+  activities     Activity[]
+  announcements  Announcement[]
+  invitations    Invitation[]
+  creator        User                 @relation(name: "OrganizationCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  financeReports FinanceReport[]      @relation()
 
   @@index([createdBy])
   @@index([name])
@@ -135,9 +137,10 @@ model Activity {
   createdAt      DateTime     @default(now()) @map("created_at")
   updatedAt      DateTime     @updatedAt @map("updated_at")
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  creator      User         @relation(name: "ActivityCreator", fields: [createdBy], references: [id], onDelete: Restrict)
-  attendances  Attendance[]
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User            @relation(name: "ActivityCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+  attendances    Attendance[]
+  financeReports FinanceReport[]
 
   @@index([organizationId])
   @@index([isPublic])
@@ -168,23 +171,20 @@ model Attendance {
 }
 
 model Attendee {
-  id                 String         @id @default(cuid())
-  userId             String?        @map("user_id")
-  attendanceId       String         @map("attendance_id")
-  status             AttendeeStatus @default(PENDING)
-  name               String?
-  email              String?        @db.Citext
-  attendedAt         DateTime?      @map("attended_at")
-  excuseDescription  String?        @map("excuse_description")
-  createdAt          DateTime       @default(now()) @map("created_at")
-  updatedAt          DateTime       @updatedAt @map("updated_at")
+  id                String         @id @default(cuid())
+  userId            String         @map("user_id")
+  attendanceId      String         @map("attendance_id")
+  status            AttendeeStatus @default(PENDING)
+  attendedAt        DateTime?      @map("attended_at")
+  excuseDescription String?        @map("excuse_description")
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
 
-  user       User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   attendance Attendance @relation(fields: [attendanceId], references: [id], onDelete: Cascade)
 
   @@unique([userId, attendanceId])
   @@index([attendanceId])
-  @@index([email])
   @@map("attendees")
 }
 
@@ -203,6 +203,29 @@ model Announcement {
   @@index([organizationId])
   @@index([createdBy])
   @@map("announcements")
+}
+
+model FinanceReport {
+  id             String            @id @default(cuid())
+  title          String
+  activityId     String?           @map("activity_id")
+  description    String?
+  type           FinanceReportType
+  amount         Float
+  reportDate     DateTime          @map("report_date")
+  organizationId String            @map("organization_id")
+  createdBy      String            @map("created_by")
+  createdAt      DateTime          @default(now()) @map("created_at")
+  updatedAt      DateTime          @updatedAt @map("updated_at")
+
+  activity     Activity?    @relation(fields: [activityId], references: [id], onDelete: SetNull)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator      User         @relation(name: "FinanceReportCreator", fields: [createdBy], references: [id], onDelete: Restrict)
+
+  @@index([organizationId])
+  @@index([createdBy])
+  @@index([activityId])
+  @@map("finance_reports")
 }
 
 model VerificationToken {
@@ -252,4 +275,9 @@ enum VerificationTokenType {
   EMAIL_VERIFICATION
   PASSWORD_RESET
   EMAIL_CHANGE
+}
+
+enum FinanceReportType {
+  INCOME
+  EXPENSE
 }

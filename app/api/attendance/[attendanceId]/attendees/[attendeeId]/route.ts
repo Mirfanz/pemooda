@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { Role } from "@/lib/generated/prisma/enums";
+import { Attendee } from "@/types";
 
 const updateAttendeeSchema = z.object({
   action: z.enum(["mark_excuse", "update_excuse", "cancel_excuse"]),
@@ -25,19 +26,17 @@ export async function PATCH(
     const currentUser = await getCurrentUser();
     const { attendanceId, attendeeId } = await params;
 
-    if (!currentUser) {
+    if (!currentUser)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 },
       );
-    }
 
-    if (!currentUser.organization) {
+    if (!currentUser.organization)
       return NextResponse.json(
         { success: false, message: "Not joined organization yet" },
         { status: 403 },
       );
-    }
 
     // Check if user has permission to update attendee (only KETUA and SEKRETARIS)
     if (!hasRole(currentUser.role, [Role.KETUA, Role.SEKRETARIS])) {
@@ -70,9 +69,7 @@ export async function PATCH(
     const attendance = await prisma.attendance.findFirst({
       where: {
         id: attendanceId,
-        activity: {
-          organizationId: currentUser.organization.id,
-        },
+        activity: { organizationId: currentUser.organization.id },
       },
     });
 
@@ -91,12 +88,11 @@ export async function PATCH(
       },
     });
 
-    if (!attendee) {
+    if (!attendee)
       return NextResponse.json(
         { success: false, message: "Attendee not found" },
         { status: 404 },
       );
-    }
 
     const oldStatus = attendee.status;
     let newStatus = oldStatus;
@@ -194,23 +190,23 @@ export async function PATCH(
       });
     }
 
+    const attendeeResponse: Attendee = {
+      id: updatedAttendee.id,
+      userId: updatedAttendee.userId,
+      attendanceId: updatedAttendee.attendanceId,
+      status: updatedAttendee.status,
+      attendedAt: updatedAttendee.attendedAt,
+      excuseDescription: updatedAttendee.excuseDescription,
+      createdAt: updatedAttendee.createdAt,
+      updatedAt: updatedAttendee.updatedAt,
+      user: updatedAttendee.user,
+    };
+
     return NextResponse.json(
       {
         success: true,
         message: "Attendee status updated successfully",
-        data: {
-          id: updatedAttendee.id,
-          userId: updatedAttendee.userId,
-          attendanceId: updatedAttendee.attendanceId,
-          status: updatedAttendee.status,
-          name: updatedAttendee.name,
-          email: updatedAttendee.email,
-          attendedAt: updatedAttendee.attendedAt,
-          excuseDescription: updatedAttendee.excuseDescription,
-          createdAt: updatedAttendee.createdAt,
-          updatedAt: updatedAttendee.updatedAt,
-          user: updatedAttendee.user,
-        },
+        data: attendeeResponse,
       },
       { status: 200 },
     );

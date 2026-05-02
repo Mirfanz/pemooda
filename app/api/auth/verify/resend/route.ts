@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { sendEmailVerification } from "@/lib/mailer.verification";
+import { sendEmailVerification } from "@/lib/mailer";
 import { getCurrentUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { randomBytes } from "crypto";

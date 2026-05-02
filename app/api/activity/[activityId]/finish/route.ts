@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, hasRole } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { Role } from "@/lib/generated/prisma/enums";
+import { Activity } from "@/types";
 
 export async function PATCH(
   request: NextRequest,
@@ -76,9 +77,7 @@ export async function PATCH(
     // Update activity with current time as endDate
     const updatedActivity = await prisma.activity.update({
       where: { id: activityId },
-      data: {
-        endDate: now,
-      },
+      data: { endDate: now },
       include: {
         organization: {
           select: {
@@ -90,27 +89,26 @@ export async function PATCH(
         },
       },
     });
+    const data: Activity = {
+      id: updatedActivity.id,
+      title: updatedActivity.title,
+      description: updatedActivity.description,
+      notes: updatedActivity.notes,
+      type: updatedActivity.type,
+      isPublic: updatedActivity.isPublic,
+      startDate: updatedActivity.startDate,
+      endDate: updatedActivity.endDate,
+      location: updatedActivity.location,
+      mapsUrl: updatedActivity.mapsUrl,
+      createdAt: updatedActivity.createdAt,
+      updatedAt: updatedActivity.updatedAt,
+      organization: updatedActivity.organization,
+    };
 
     return NextResponse.json({
       success: true,
       message: "Activity finished successfully",
-      data: {
-        activity: {
-          id: updatedActivity.id,
-          title: updatedActivity.title,
-          description: updatedActivity.description,
-          notes: updatedActivity.notes,
-          type: updatedActivity.type,
-          isPublic: updatedActivity.isPublic,
-          startDate: updatedActivity.startDate,
-          endDate: updatedActivity.endDate,
-          location: updatedActivity.location,
-          mapsUrl: updatedActivity.mapsUrl,
-          createdAt: updatedActivity.createdAt,
-          updatedAt: updatedActivity.updatedAt,
-          organization: updatedActivity.organization,
-        },
-      },
+      data: { activity: data },
     });
   } catch (error) {
     console.error("Error finishing activity:", error);

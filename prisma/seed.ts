@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import { PrismaClient } from "../lib/generated/prisma/client";
 import bcrypt from "bcryptjs";
 
 // const prisma = new PrismaClient();
@@ -398,9 +397,8 @@ async function main() {
   // External user untuk attendance2
   await prisma.attendee.create({
     data: {
+      userId: anggota3.id,
       attendanceId: attendance2.id,
-      name: "User External",
-      email: "external@example.com",
       status: "PENDING",
     },
   });
@@ -465,43 +463,35 @@ async function main() {
     },
   });
 
+  // 21. Buat finance report
+  console.log("Creating finance report...");
+  await prisma.financeReport.create({
+    data: {
+      organizationId: organization.id,
+      title: "Laporan Keuangan Bulan Mei 2026",
+      description: "Laporan keuangan untuk bulan Mei 2026",
+      amount: 5000000,
+      type: "INCOME",
+      reportDate: new Date("2026-05-31"),
+      createdBy: bendahara.id,
+    },
+  });
+
+  // 22. Buat finance report dengan activity terkait
+  console.log("Creating finance report with activity...");
+  await prisma.financeReport.create({
+    data: {
+      organizationId: organization.id,
+      activityId: activity2.id,
+      title: "Laporan Keuangan Pelatihan Leadership",
+      amount: 700000,
+      type: "EXPENSE",
+      reportDate: new Date("2026-05-21"),
+      createdBy: bendahara.id,
+    },
+  });
+
   console.log("✅ Seeding completed successfully!");
-  console.log("\n📋 Test Accounts Created:");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(
-    "Email: ketua@test.com       | Password: password123 | Role: KETUA",
-  );
-  console.log(
-    "Email: sekretaris@test.com  | Password: password123 | Role: SEKRETARIS",
-  );
-  console.log(
-    "Email: bendahara@test.com   | Password: password123 | Role: BENDAHARA",
-  );
-  console.log(
-    "Email: anggota1@test.com    | Password: password123 | Role: ANGGOTA",
-  );
-  console.log(
-    "Email: anggota2@test.com    | Password: password123 | Role: ANGGOTA",
-  );
-  console.log(
-    "Email: anggota3@test.com    | Password: password123 | Role: ANGGOTA",
-  );
-  console.log(
-    "Email: senior@test.com      | Password: password123 | Role: SENIOR",
-  );
-  console.log(
-    "Email: pembina@test.com     | Password: password123 | Role: PEMBINA",
-  );
-  console.log(
-    "Email: unverified@test.com  | Password: password123 | Role: - (Not Verified)",
-  );
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log("\n📊 Data Created:");
-  console.log(`- Organization: ${organization.name}`);
-  console.log(`- Total Members: ${totalMembers}`);
-  console.log(`- Total Activities: ${totalActivities}`);
-  console.log(`- Total Announcements: 3`);
-  console.log(`- Total Attendances: 3`);
 }
 
 // Helper function untuk update attendance statistics

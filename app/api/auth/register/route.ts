@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { sendEmailVerification } from "@/lib/mailer.verification";
+import { sendEmailVerification } from "@/lib/mailer";
 import { createToken, setAuthCookie } from "@/lib/auth";
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
@@ -19,7 +19,7 @@ const registerSchema = z.object({
     .min(8, "Password minimal 8 karakter")
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/,
-      "Password must contain uppercase, lowercase, and number"
+      "Password must contain uppercase, lowercase, and number",
     ),
 });
 
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
           message: "Validasi gagal",
           errors: z.flattenError(validation.error).fieldErrors,
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
           message: "Email sudah terdaftar",
           errors: { email: ["Email sudah terdaftar"] },
         },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -125,7 +125,7 @@ export async function POST(req: NextRequest) {
           user: userPayload,
         },
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error saat registrasi:", error);
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
         success: false,
         message: "Terjadi kesalahan saat registrasi",
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

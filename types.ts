@@ -1,6 +1,7 @@
 import {
   ActivityType,
   AttendeeStatus,
+  FinanceReportType,
   Role,
 } from "@/lib/generated/prisma/enums";
 import { SVGProps } from "react";
@@ -15,7 +16,7 @@ export interface User {
   avatarUrl: string | null;
   isVerified: boolean;
   role: Role | null;
-  organization: Organization | null;
+  organization: OrganizationMinimal | null;
 }
 
 export interface UserMinimal {
@@ -31,7 +32,7 @@ export interface JWTPayload {
   exp: number;
 }
 
-export interface Organization {
+export interface OrganizationMinimal {
   id: string;
   name: string;
   imageUrl: string | null;
@@ -44,7 +45,7 @@ export interface OrganizationSummary {
   totalActivities: number;
 }
 
-export interface OrganizationFull extends Organization {
+export interface Organization extends OrganizationMinimal {
   summary: OrganizationSummary | null;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -55,6 +56,7 @@ export interface OrganizationFull extends Organization {
   facebookUrl: string | null;
   twitterUrl: string | null;
 }
+
 export interface OrganizationUser {
   id: string;
   name: string;
@@ -68,7 +70,7 @@ export interface OrganizationInvitation {
   role: Role;
   createdAt: Date | string;
   expiresAt: Date | string;
-  organization: Organization;
+  organization: OrganizationMinimal;
   creator: UserMinimal;
 }
 
@@ -85,7 +87,7 @@ export interface Activity {
   mapsUrl: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
-  organization: Organization;
+  organization: OrganizationMinimal;
 }
 
 export type Color =
@@ -113,14 +115,27 @@ export interface Attendance {
   totalPending: number;
   createdAt: Date | string;
   updatedAt: Date | string;
-  _count?: {
-    attendees: number;
-  };
   attendees?: Attendee[];
   activity?: {
     id: string;
     title: string;
+    description: string | null;
   };
+}
+
+export interface AttendanceInfo {
+  id: string;
+  name: string;
+  description: string | null;
+  startDate: Date | string | null;
+  endDate: Date | string | null;
+  allowExternalUsers: boolean;
+  activity: {
+    id: string;
+    title: string;
+    description: string | null;
+  };
+  hasAttended: boolean;
 }
 
 export interface Attendee {
@@ -128,13 +143,11 @@ export interface Attendee {
   userId: string | null;
   attendanceId: string;
   status: AttendeeStatus;
-  name: string | null;
-  email: string | null;
   attendedAt: Date | string | null;
   excuseDescription: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
-  user?: UserMinimal | null;
+  user: UserMinimal;
 }
 
 export interface AttendanceSummary {
@@ -143,4 +156,18 @@ export interface AttendanceSummary {
   absent: number;
   excuse: number;
   pending: number;
+}
+
+export interface FinanceReport {
+  id: string;
+  title: string;
+  description: string | null;
+  amount: number;
+  reportDate: Date | string;
+  type: FinanceReportType;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  organization: OrganizationMinimal;
+  activity: Activity | null;
+  creator: UserMinimal;
 }

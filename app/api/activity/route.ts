@@ -27,6 +27,7 @@ const createActivitySchema = z.object({
     .refine((val) => new Date(val) >= new Date(), {
       message: "Start date cannot be in the past",
     }),
+  endDate: z.iso.datetime("Invalid end date format").optional().nullable(),
   notes: z.array(z.string()).default([]),
 });
 
@@ -55,7 +56,7 @@ export async function GET(req: NextRequest) {
       title: search?.length
         ? { contains: search, mode: "insensitive" }
         : undefined,
-      // isPublic: isPublic === "true" ? true : false,
+      isPublic: isPublic === "true" ? true : false,
     },
     take: limit,
     skip: page ? (parseInt(page) - 1) * limit : 0,
@@ -122,19 +123,18 @@ export async function POST(req: NextRequest) {
   try {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser) {
+    if (!currentUser)
       return NextResponse.json(
         { success: false, message: "Unauthorized" },
         { status: 401 },
       );
-    }
 
-    if (!currentUser.organization) {
+    if (!currentUser.organization)
       return NextResponse.json(
         { success: false, message: "Not joined organization yet" },
         { status: 403 },
       );
-    }
+
     if (!hasRole(currentUser.role, [Role.KETUA, Role.SEKRETARIS]))
       return NextResponse.json(
         {
@@ -147,7 +147,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validation = createActivitySchema.safeParse(body);
 
-    if (!validation.success) {
+    if (!validation.success)
       return NextResponse.json(
         {
           success: false,
@@ -156,7 +156,6 @@ export async function POST(req: NextRequest) {
         },
         { status: 400 },
       );
-    }
 
     const {
       title,
@@ -166,43 +165,56 @@ export async function POST(req: NextRequest) {
       type,
       isPublic,
       startDate,
+      endDate,
       notes,
     } = validation.data;
 
+    if (endDate && new Date(endDate) < new Date(startDate))
+      return NextResponse.json(
+        { success: false, message: "End date cannot be before start date" },
+        { status: 400 },
+      );
+
     // Create activity
-    const activity = await prisma.activity.create({
-      data: {
-        title,
-        description,
-        location,
-        mapsUrl,
-        type,
-        isPublic,
-        startDate: new Date(startDate),
-        notes,
-        organizationId: currentUser.organization.id,
-        createdBy: currentUser.id,
-      },
-      include: {
-        organization: {
-          select: {
-            id: true,
-            name: true,
-            imageUrl: true,
-            tagline: true,
+    const activity: Activity = await prisma.$transaction(async () => {
+      if (!currentUser.organization)
+        throw new Error("User does not belong to any organization");
+
+      const newActivity: Activity = await prisma.activity.create({
+        data: {
+          title,
+          description,
+          location,
+          mapsUrl,
+          type,
+          isPublic,
+          startDate: new Date(startDate),
+          endDate: endDate ? new Date(endDate) : null,
+          notes,
+          organizationId: currentUser.organization.id,
+          createdBy: currentUser.id,
+        },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+              tagline: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Update organization summary
-    await prisma.organizationSummary.update({
-      where: { organizationId: currentUser.organization.id },
-      data: {
-        totalActivities: {
-          increment: 1,
+      // Update organization summary
+      await prisma.organizationSummary.update({
+        where: { organizationId: currentUser.organization.id },
+        data: {
+          totalActivities: { increment: 1 },
         },
-      },
+      });
+
+      return newActivity;
     });
 
     const activityResponse: Activity = {

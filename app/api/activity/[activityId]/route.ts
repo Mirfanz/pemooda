@@ -103,42 +103,47 @@ export async function DELETE(
       return NextResponse.json(
         {
           success: false,
-          message: "Only leader can delete activity",
+          message: "Hanya ketua dan sekretaris yang bisa menghapus aktivitas",
         },
         { status: 403 },
       );
 
     const { activityId } = await params;
 
-    // Delete activity
-    const activity = await prisma.activity.delete({
-      where: {
-        id: activityId,
-        organizationId: currentUser.organization.id,
-      },
-      include: {
-        organization: {
-          select: {
-            id: true,
-            name: true,
-            imageUrl: true,
-            tagline: true,
+    // Delete activity and update summary in transaction
+    const activity = await prisma.$transaction(async (tx) => {
+      if (!currentUser.organization)
+        throw new Error("Organization ID is required");
+
+      const deletedActivity = await tx.activity.delete({
+        where: {
+          id: activityId,
+          organizationId: currentUser.organization.id,
+        },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+              imageUrl: true,
+              tagline: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Update organization summary
-    await prisma.organizationSummary.update({
-      where: { organizationId: currentUser.organization.id },
-      data: {
-        totalActivities: {
-          decrement: 1,
+      // Update organization summary
+      await tx.organizationSummary.update({
+        where: { organizationId: currentUser.organization.id },
+        data: {
+          totalActivities: { decrement: 1 },
         },
-      },
+      });
+
+      return deletedActivity;
     });
 
-    const activityResponse: Activity = {
+    const data: Activity = {
       id: activity.id,
       title: activity.title,
       description: activity.description,
@@ -149,16 +154,16 @@ export async function DELETE(
       location: activity.location,
       mapsUrl: activity.mapsUrl,
       notes: activity.notes,
-      organization: activity.organization,
       createdAt: activity.createdAt,
       updatedAt: activity.updatedAt,
+      organization: activity.organization,
     };
 
     return NextResponse.json(
       {
         success: true,
-        message: "Activity created successfully",
-        data: activityResponse,
+        message: "Activity deleted successfully",
+        data,
       },
       { status: 201 },
     );

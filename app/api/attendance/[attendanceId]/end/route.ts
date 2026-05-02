@@ -87,18 +87,14 @@ export async function POST(
         attendanceId,
         status: "PENDING",
       },
-      data: {
-        status: "ABSENT",
-      },
+      data: { status: "ABSENT" },
     });
 
     // Update attendance summary
     await prisma.attendance.update({
       where: { id: attendanceId },
       data: {
-        totalAbsent: {
-          increment: pendingCount,
-        },
+        totalAbsent: { increment: pendingCount },
         totalPending: 0,
       },
     });

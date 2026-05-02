@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { AttendanceInfo } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
@@ -25,6 +26,7 @@ export async function GET(
             id: true,
             title: true,
             organizationId: true,
+            description: true,
           },
         },
       },
@@ -59,20 +61,22 @@ export async function GET(
       },
     });
 
+    const attendanceInfo: AttendanceInfo = {
+      id: attendance.id,
+      name: attendance.name,
+      description: attendance.description,
+      startDate: attendance.startDate,
+      endDate: attendance.endDate,
+      allowExternalUsers: attendance.allowExternalUsers,
+      activity: attendance.activity,
+      hasAttended: existingAttendee?.status === "PRESENT",
+    };
+
     return NextResponse.json(
       {
         success: true,
         message: "Success get attendance info",
-        data: {
-          id: attendance.id,
-          name: attendance.name,
-          description: attendance.description,
-          startDate: attendance.startDate,
-          endDate: attendance.endDate,
-          allowExternalUsers: attendance.allowExternalUsers,
-          activity: attendance.activity,
-          hasAttended: existingAttendee?.status === "PRESENT",
-        },
+        data: attendanceInfo,
       },
       { status: 200 },
     );

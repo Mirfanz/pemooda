@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import {
-  OrganizationFull,
+  Organization,
   OrganizationInvitation,
   OrganizationUser,
 } from "@/types";
@@ -19,11 +19,11 @@ export const organizationKeys = {
 export function useOrganizationDetail() {
   return useQuery({
     queryKey: organizationKeys.detail(),
-    queryFn: async (): Promise<OrganizationFull> => {
+    queryFn: async (): Promise<Organization> => {
       const response = await axios.get("/api/organization/detail");
       if (!response.data.success) {
         throw new Error(
-          response.data.message || "Failed to fetch organization"
+          response.data.message || "Failed to fetch organization",
         );
       }
       return response.data.data;
@@ -68,7 +68,7 @@ export function useMyInvitations() {
       const response = await axios.get("/api/organization/invitations/my");
       if (!response.data.success) {
         throw new Error(
-          response.data.message || "Failed to fetch my invitations"
+          response.data.message || "Failed to fetch my invitations",
         );
       }
       return response.data.data;

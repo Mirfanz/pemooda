@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { Attendee } from "@/types";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -161,32 +162,34 @@ export async function POST(
     }
 
     // Create new attendee
-    const newAttendee = await prisma.attendee.create({
-      data: {
-        userId: currentUser.id,
-        attendanceId,
-        status: "PRESENT",
-        attendedAt: now,
-        name: name || currentUser.name,
-        email: email || null,
-      },
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            avatarUrl: true,
+    const newAttendee: Attendee = await prisma.$transaction(async (prisma) => {
+      const createdAttendee = await prisma.attendee.create({
+        data: {
+          userId: currentUser.id,
+          attendanceId,
+          status: "PRESENT",
+          attendedAt: now,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              avatarUrl: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // Update attendance summary
-    await prisma.attendance.update({
-      where: { id: attendanceId },
-      data: {
-        totalPresent: { increment: 1 },
-      },
+      // Update attendance summary
+      await prisma.attendance.update({
+        where: { id: attendanceId },
+        data: {
+          totalPresent: { increment: 1 },
+        },
+      });
+
+      return createdAttendee;
     });
 
     return NextResponse.json(

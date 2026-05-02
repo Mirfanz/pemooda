@@ -38,6 +38,7 @@ export async function GET(
           select: {
             id: true,
             title: true,
+            description: true,
           },
         },
         attendees: {
@@ -82,8 +83,6 @@ export async function GET(
         userId: attendee.userId,
         attendanceId: attendee.attendanceId,
         status: attendee.status,
-        name: attendee.name,
-        email: attendee.email,
         attendedAt: attendee.attendedAt,
         excuseDescription: attendee.excuseDescription,
         createdAt: attendee.createdAt,

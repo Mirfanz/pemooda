@@ -762,8 +762,6 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                   {attendance.attendees.map((attendee) => {
                     const statusConfig = getStatusConfig(attendee.status);
                     const StatusIcon = statusConfig.icon;
-                    const attendeeName =
-                      attendee.user?.name || attendee.name || "Unknown";
 
                     return (
                       <div
@@ -771,12 +769,14 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                         className="flex items-center gap-3 p-2 rounded-lg hover:bg-default-100 transition-colors"
                       >
                         <Avatar
-                          src={attendee.user?.avatarUrl || undefined}
-                          name={attendeeName}
+                          src={attendee.user.avatarUrl || undefined}
+                          name={attendee.user.name}
                           size="sm"
                         />
                         <div className="flex-1">
-                          <p className="text-sm font-medium">{attendeeName}</p>
+                          <p className="text-sm font-medium">
+                            {attendee.user.name}
+                          </p>
                           {attendee.attendedAt && (
                             <p className="text-xs text-default-400">
                               {fns.format(
@@ -786,9 +786,9 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                               )}
                             </p>
                           )}
-                          {attendee.email && !attendee.attendedAt && (
+                          {attendee.user && !attendee.attendedAt && (
                             <p className="text-xs text-default-400">
-                              {attendee.email}
+                              {attendee.user.name}
                             </p>
                           )}
                           {attendee.excuseDescription && (
@@ -829,7 +829,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                                     onPress={() =>
                                       handleMarkExcuse(
                                         attendee.id,
-                                        attendeeName,
+                                        attendee.user.name,
                                       )
                                     }
                                   >
@@ -842,7 +842,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                                       onPress={() =>
                                         handleEditExcuseDescription(
                                           attendee.id,
-                                          attendeeName,
+                                          attendee.user.name,
                                           attendee.excuseDescription,
                                         )
                                       }
@@ -856,7 +856,7 @@ const AttendanceDetail = ({ activityId, attendanceId }: Props) => {
                                       onPress={() =>
                                         handleCancelExcuse(
                                           attendee.id,
-                                          attendeeName,
+                                          attendee.user.name,
                                         )
                                       }
                                     >

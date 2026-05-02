@@ -18,11 +18,14 @@ const createAttendanceSchema = z
       .max(500, "Description must not exceed 500 characters")
       .optional(),
     allowExternalUsers: z.boolean().default(false),
-    startDate: z
-      .string()
+    startDate: z.iso
       .datetime("Invalid start date format")
+      .refine((val) => new Date(val) >= new Date(), {
+        message: "Start date cannot be in the past",
+      })
       .optional()
       .nullable(),
+    endDate: z.iso.datetime("Invalid end date format").optional().nullable(),
     userIds: z.array(z.string()).default([]),
   })
   .refine(

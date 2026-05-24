@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   const currentUser = await getCurrentUser();
   const limit = 20;
   const page = req.nextUrl.searchParams.get("page");
-  const isPublic = req.nextUrl.searchParams.get("public");
+  const isPublic = req.nextUrl.searchParams.get("public") === "true";
   const search = req.nextUrl.searchParams.get("search");
 
   if (!currentUser)
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
       title: search?.length
         ? { contains: search, mode: "insensitive" }
         : undefined,
-      isPublic: isPublic === "true" ? true : false,
+      isPublic: isPublic || undefined,
     },
     take: limit,
     skip: page ? (parseInt(page) - 1) * limit : 0,
@@ -112,7 +112,7 @@ export async function GET(req: NextRequest) {
         total: activities.length,
         isLastPage: activities.length < limit ? true : false,
         search,
-        isPublic: isPublic === "true" ? true : false,
+        isPublic: isPublic,
       },
     },
     { status: 200 },

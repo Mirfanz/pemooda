@@ -92,7 +92,7 @@ const FinanceReportMain = () => {
       </div>
 
       {/* Body */}
-      <div className="px-4 space-y-3 my-4">
+      <div className="p-4 flex flex-col gap-3">
         {isLoading ? (
           <Card className="shadow-sm">
             <CardBody className="text-center py-12">

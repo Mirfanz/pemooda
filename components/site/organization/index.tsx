@@ -15,6 +15,7 @@ import {
   ModalFooter,
   useDisclosure,
   addToast,
+  User,
 } from "@heroui/react";
 
 import Link from "next/link";
@@ -29,9 +30,9 @@ import { cn } from "@/lib/utils";
 import {
   CalendarMark,
   MapPointWave,
+  MenuDots,
   Phone,
   QrCode,
-  Settings,
   UsersGroupRounded,
   UsersGroupTwoRounded,
   WalletMoney,
@@ -57,7 +58,7 @@ const fastMenuItems = [
   {
     label: "Keuangan",
     icon: WalletMoney,
-    href: "/finance",
+    href: "/finance/report",
   },
 ];
 
@@ -102,20 +103,19 @@ const Organization = () => {
 
   return (
     <main className="pb-4">
-      <div className="bg-linear-to-b from-primary to-primary-800 text-white p-4 pb-16 rounded-b-3xl">
+      <div className="bg-linear-to-b from-primary to-primary-800 text-white rounded-b-3xl p-4 pb-16">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-lg font-semibold">Organisasi</h1>
-          {isKetua && (
-            <Button
-              as={Link}
-              href="/organization/settings"
-              isIconOnly
-              variant="light"
-              className="text-white"
-            >
-              <Settings weight="Broken" className="w-5 h-5" />
-            </Button>
-          )}
+          <h1 className="">@garda_tama</h1>
+          <Button
+            as={Link}
+            href="/organization/settings"
+            isIconOnly
+            variant="light"
+            size="sm"
+            className="text-white"
+          >
+            <MenuDots weight="Broken" className="w-5 h-5" />
+          </Button>
         </div>
         <div className="text-center">
           <Avatar
@@ -134,8 +134,24 @@ const Organization = () => {
         </div>
       </div>
 
+      {/* Your Role */}
+      <div className="px-6 -mt-8">
+        <Card className="border-1.5 border-primary-700" shadow="none">
+          <CardBody className="flex flex-row items-center gap-3 justify-between">
+            <User
+              name={auth.user.name}
+              avatarProps={{ src: auth.user.avatarUrl || undefined }}
+              description="Anda"
+            />
+            <Chip size="sm" color="primary" variant="flat">
+              {roleEnum[auth.user.role || "ANGGOTA"].label}
+            </Chip>
+          </CardBody>
+        </Card>
+      </div>
+
       {/* Stats Cards */}
-      <div className="px-4 -mt-10">
+      <div className="px-4 mt-6">
         <div className="grid grid-cols-2 gap-3">
           <Card className="shadow-lg">
             <CardBody className="text-center py-4">
@@ -167,22 +183,6 @@ const Organization = () => {
             </CardBody>
           </Card>
         </div>
-      </div>
-
-      {/* Your Role */}
-      <div className="px-4 mt-4">
-        <Card className="shadow-sm">
-          <CardBody className="flex flex-row items-center gap-3">
-            <Avatar src={auth.user.avatarUrl || undefined} size="sm" />
-            <div className="flex-1">
-              <p className="text-sm font-medium">{auth.user.name}</p>
-              <p className="text-xs text-muted-foreground">Anda</p>
-            </div>
-            <Chip size="sm" color="primary" variant="flat">
-              {roleEnum[auth.user.role || "ANGGOTA"].label}
-            </Chip>
-          </CardBody>
-        </Card>
       </div>
 
       {/* Menu Cepat */}

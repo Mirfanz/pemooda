@@ -28,7 +28,7 @@ interface CreateActivityData {
 }
 
 interface GetActivitiesParams {
-  page?: number;
+  // page?: number;
   public?: boolean;
   search?: string;
 }
@@ -38,7 +38,7 @@ export function useActivities(params: GetActivitiesParams = {}) {
     queryKey: activityKeys.list(JSON.stringify(params)),
     queryFn: async ({ pageParam }) => {
       const searchParams = new URLSearchParams();
-      searchParams.set("page", pageParam.toString());
+      // searchParams.set("page", pageParam.toString());
       if (params.public !== undefined)
         searchParams.set("public", params.public.toString());
       if (params.search) searchParams.set("search", params.search);

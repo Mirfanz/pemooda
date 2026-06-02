@@ -1,3 +1,5 @@
+import Finance from "@/components/site/finance";
+
 export default function FinancePage() {
-  return <div>Finance Page</div>;
+  return <Finance />;
 }

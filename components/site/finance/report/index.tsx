@@ -18,6 +18,7 @@ import { FinanceReport } from "@/types";
 import { useReports } from "@/hooks/queries/finance";
 import Link from "next/link";
 import FinanceReportCard from "./finance-report-card";
+import FinanceReportDetailModal from "./finance-report-detail-modal";
 import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DocumentAdd,
@@ -32,6 +33,7 @@ const FinanceReportMain = () => {
   const [type, setType] = useState<"income" | "expense" | undefined>();
   const [filterOpen, setFilterOpen] = useState(false);
   const isMobile = useIsMobile();
+  const [shownReport, setShownReport] = useState<FinanceReport | null>(null);
 
   const {
     data: reportsData,
@@ -43,6 +45,10 @@ const FinanceReportMain = () => {
     search: search || undefined,
     type,
   });
+
+  const showReportDetail = (report: FinanceReport) => {
+    setShownReport(report);
+  };
 
   const reports: FinanceReport[] =
     reportsData?.pages?.flatMap((page) => page.data) || [];
@@ -113,7 +119,11 @@ const FinanceReportMain = () => {
           </Card>
         ) : (
           reports.map((report: FinanceReport) => (
-            <FinanceReportCard key={report.id} report={report} />
+            <FinanceReportCard
+              key={report.id}
+              report={report}
+              showDetail={showReportDetail}
+            />
           ))
         )}
         {hasNextPage && (
@@ -194,6 +204,12 @@ const FinanceReportMain = () => {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+
+      <FinanceReportDetailModal
+        report={shownReport}
+        isOpen={!!shownReport}
+        onClose={() => setShownReport(null)}
+      />
     </main>
   );
 };

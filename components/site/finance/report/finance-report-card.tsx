@@ -5,10 +5,7 @@ import { Button, Card, CardBody, addToast } from "@heroui/react";
 import { FinanceReportType } from "@/lib/generated/prisma/enums";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
-import {
-  CourseDown,
-  CourseUp,
-} from "@solar-icons/react";
+import { CourseDown, CourseUp } from "@solar-icons/react";
 import { useDeleteFinanceReport } from "@/hooks/queries/finance";
 import axios from "axios";
 import Link from "next/link";
@@ -16,9 +13,10 @@ import clsx from "clsx";
 
 interface FinanceReportCardProps {
   report: FinanceReport;
+  showDetail?: (report: FinanceReport) => void;
 }
 
-const FinanceReportCard = ({ report }: FinanceReportCardProps) => {
+const FinanceReportCard = ({ report, showDetail }: FinanceReportCardProps) => {
   const { mutate: deleteReport, isPending } = useDeleteFinanceReport();
 
   const isIncome = report.type === FinanceReportType.INCOME;
@@ -62,42 +60,45 @@ const FinanceReportCard = ({ report }: FinanceReportCardProps) => {
     }
   };
   return (
-    <Link href={`/finance/report/${report.id}`}>
-      <Card className="">
-        <CardBody>
-          <div className="flex gap-2">
-            {isIncome ? (
-              <Button isIconOnly size="sm" color="success" variant="flat">
-                <CourseUp className="size-5" />
-              </Button>
-            ) : (
-              <Button isIconOnly size="sm" color="danger" variant="flat">
-                <CourseDown className="size-5" />
-              </Button>
-            )}
-            <div className="w-full">
-              <h3 className="text-sm line-clamp-2">{report.title}</h3>
-              <div className="flex justify-between items-center">
-                <small className="text-xs text-muted">
-                  {format(new Date(report.reportDate), "EEEE, dd MMM yyyy", {
-                    locale: id,
-                  })}
-                </small>
-                <h3
-                  className={clsx(
-                    "font-medium text-nowrap",
-                    isIncome ? "text-success" : "text-danger",
-                  )}
-                >
-                  {isIncome ? "+" : "-"}
-                  {report.amount.toLocaleString("id-ID")}
-                </h3>
-              </div>
+    <Card
+      className=""
+      isPressable
+      fullWidth
+      onClick={() => showDetail?.(report)}
+    >
+      <CardBody>
+        <div className="flex gap-2">
+          {isIncome ? (
+            <Button isIconOnly size="sm" color="success" variant="flat">
+              <CourseUp className="size-5" />
+            </Button>
+          ) : (
+            <Button isIconOnly size="sm" color="danger" variant="flat">
+              <CourseDown className="size-5" />
+            </Button>
+          )}
+          <div className="w-full">
+            <h3 className="text-sm line-clamp-2">{report.title}</h3>
+            <div className="flex justify-between items-center">
+              <small className="text-xs text-muted">
+                {format(new Date(report.reportDate), "EEEE, dd MMM yyyy", {
+                  locale: id,
+                })}
+              </small>
+              <h3
+                className={clsx(
+                  "font-medium text-nowrap",
+                  isIncome ? "text-success" : "text-danger",
+                )}
+              >
+                {isIncome ? "+" : "-"}
+                {report.amount.toLocaleString("id-ID")}
+              </h3>
             </div>
           </div>
-        </CardBody>
-      </Card>
-    </Link>
+        </div>
+      </CardBody>
+    </Card>
   );
 };
 
